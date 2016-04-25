@@ -14,8 +14,13 @@ func AddReminder() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		thenDay := r.URL.Query().Get("day")
 		thenTime := r.URL.Query().Get("time")
+		message := r.URL.Query().Get("message")
 		if thenTime == "" {
 			http.Error(w, "Example: provide a `time=1330` param", http.StatusBadRequest)
+			return
+		}
+		if message == "" {
+			http.Error(w, "Example: provide a `message=buy-beer` param", http.StatusBadRequest)
 			return
 		}
 		delay, err := timeToSleepFor(thenDay, thenTime)
@@ -25,12 +30,12 @@ func AddReminder() http.Handler {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Your command has been added to the queue. Thank you."))
-		go func(time.Duration) {
+		go func(time.Duration, string) {
 			select {
 			case <-time.After(delay):
-				execute()
+				execute(message)
 			}
-		}(delay)
+		}(delay, message)
 	})
 }
 
@@ -89,8 +94,8 @@ func cmdResultToInt(cmdResult bytes.Buffer) (int64, error) {
 
 }
 
-func execute() {
-	cmd := exec.Command("~/scripts/pushover.sh")
+func execute(msg string) {
+	cmd := exec.Command("~/scripts/pushover.sh", msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
