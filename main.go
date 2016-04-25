@@ -7,7 +7,7 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("/", handlers.AddReminder())
+	mux.Handle("/", AddReminder())
 	err := http.ListenAndServe(":42888", mux)
 	log.Fatal(err)
 
