@@ -95,7 +95,7 @@ func cmdResultToInt(cmdResult bytes.Buffer) (int64, error) {
 }
 
 func execute(msg string) {
-	cmd := exec.Command("~/bin/pushover", msg)
+	cmd := exec.Command("/home/zaros/bin/pushover", msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
