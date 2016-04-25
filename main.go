@@ -6,9 +6,11 @@ import (
 )
 
 func main() {
+	port := ":42888"
 	mux := http.NewServeMux()
 	mux.Handle("/", AddReminder())
-	err := http.ListenAndServe(":42888", mux)
+	log.Printf("Serving on %v", port)
+	err := http.ListenAndServe(port, mux)
 	log.Fatal(err)
 
 }
