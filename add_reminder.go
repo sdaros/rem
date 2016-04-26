@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -95,7 +96,7 @@ func cmdResultToInt(cmdResult bytes.Buffer) (int64, error) {
 }
 
 func execute(msg string) {
-	cmd := exec.Command("/home/zaros/bin/pushover", msg)
+	cmd := exec.Command(os.Getenv("HOME")+"/bin/pushover", msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
