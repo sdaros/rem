@@ -17,11 +17,11 @@ func AddReminder() http.Handler {
 		thenTime := r.URL.Query().Get("time")
 		message := r.URL.Query().Get("message")
 		if thenTime == "" {
-			http.Error(w, "Example: provide a `time=1330` param", http.StatusBadRequest)
+			http.Redirect(w, r, "https://github.com/sdaros/rem#rem", http.StatusTemporaryRedirect)
 			return
 		}
 		if message == "" {
-			http.Error(w, "Example: provide a `message=buy-beer` param", http.StatusBadRequest)
+			http.Redirect(w, r, "https://github.com/sdaros/rem#rem", http.StatusTemporaryRedirect)
 			return
 		}
 		delay, err := timeToSleepFor(thenDay, thenTime)
