@@ -1,5 +1,6 @@
-# r
-simple reminders
+# REM
+
+Add reminders using a simple API.
 
 ## Setting it up with Uberspace
 
@@ -7,7 +8,7 @@ simple reminders
 
 - Setup the .htaccess file on the root
 
-```
+```bash
 [~]$ cat .htaccess
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
@@ -20,7 +21,7 @@ RewriteRule ^r/(.*) http://localhost:42888/$1 [P]
 
 - Setup daemontools to use the compiled binary from this repo
 
-```
+```bash
 [~]$ uberspace-setup-service my-r ~/bin/r
 ```
 
@@ -28,7 +29,7 @@ RewriteRule ^r/(.*) http://localhost:42888/$1 [P]
 
 I use pushover since they have a simple API.
 
-```
+```bash
 [~]$ cat bin/pushover
 #!/usr/bin/env bash
 TOKEN=<TOKEN>
