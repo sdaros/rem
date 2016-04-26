@@ -22,7 +22,7 @@ RewriteRule ^r/(.*) http://localhost:42888/$1 [P]
 - Setup daemontools to use the compiled binary from this repo
 
 ```bash
-[~]$ uberspace-setup-service my-r ~/bin/r
+[~]$ uberspace-setup-service my-rem ~/bin/rem
 ```
 
 ## Configuring reminders script
