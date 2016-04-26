@@ -2,6 +2,10 @@
 
 Add reminders using a simple API.
 
+## Compile binary
+
+You can compile the binary by running `go build`. 
+
 ## Setting it up with Uberspace
 
 ### HTTPS Proxying

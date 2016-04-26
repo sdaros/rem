@@ -7,11 +7,9 @@ import (
 	"github.com/sdaros/rem/handlers"
 )
 
-const (
-	// buildMetadata is replaced when package is built using -ldflags -X
-	// ex: go build -ldflags "-X main.buildMetadata=+`git rev-parse --short HEAD`"
-	buildMetadata = ""
+var (
 	version       = "0.1.0"
+	buildMetadata string
 	name          = "rem"
 )
 
