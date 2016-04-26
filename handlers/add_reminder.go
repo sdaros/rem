@@ -96,7 +96,7 @@ func cmdResultToInt(cmdResult bytes.Buffer) (int64, error) {
 }
 
 func execute(msg string) {
-	cmd := exec.Command(os.Getenv("HOME")+"/bin/pushover", msg)
+	cmd := exec.Command(os.Getenv("HOME")+"/bin/rem_script", msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
