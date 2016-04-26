@@ -18,7 +18,7 @@ const (
 func main() {
 	port := ":42888"
 	mux := http.NewServeMux()
-	mux.Handle("/", AddReminder())
+	mux.Handle("/", handlers.AddReminder())
 	log.Printf("Serving %v (version: %v) on %v", name, Version(), port)
 	err := http.ListenAndServe(port, mux)
 	log.Fatal(err)
