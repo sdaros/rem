@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -31,6 +30,7 @@ func AddReminder() http.Handler {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Your reminder has been added. Thank you."))
+		log.Printf("The reminder '%v' will be sent to you at %v", message, time.Now().Add(delay))
 		go func(time.Duration, string) {
 			select {
 			case <-time.After(delay):
@@ -38,61 +38,6 @@ func AddReminder() http.Handler {
 			}
 		}(delay, message)
 	})
-}
-
-func timeToSleepFor(thenDay, thenTime string) (time.Duration, error) {
-	then, err := thenAsUnix(thenDay, thenTime)
-	if err != nil {
-		return 0, err
-	}
-	now, err := nowAsUnix()
-	if err != nil {
-		return 0, err
-	}
-	return (time.Duration(then-now) * time.Second), nil
-}
-
-func nowAsUnix() (int64, error) {
-	cmd := exec.Command("date", "+%s")
-	var cmdResult bytes.Buffer
-	cmd.Stdout = &cmdResult
-	err := cmd.Run()
-	if err != nil {
-		return 0, err
-	}
-	now, err := cmdResultToInt(cmdResult)
-	if err != nil {
-		return 0, err
-	}
-	return now, nil
-}
-
-func thenAsUnix(thenDay, thenTime string) (int64, error) {
-	cmd := exec.Command("date", "--date", thenDay+" "+thenTime, "+%s")
-	var cmdResult bytes.Buffer
-	cmd.Stdout = &cmdResult
-	err := cmd.Run()
-	if err != nil {
-		return 0, err
-	}
-	then, err := cmdResultToInt(cmdResult)
-	if err != nil {
-		return 0, err
-	}
-	return then, nil
-}
-
-func cmdResultToInt(cmdResult bytes.Buffer) (int64, error) {
-	result, err := cmdResult.ReadString('\n')
-	if err != nil {
-		return 0, err
-	}
-	resultAsUnixTime, err := strconv.Atoi(strings.TrimSuffix(result, "\n"))
-	if err != nil {
-		return 0, err
-	}
-	return int64(resultAsUnixTime), nil
-
 }
 
 func execute(msg string) {
@@ -104,4 +49,27 @@ func execute(msg string) {
 		log.Fatal(err)
 	}
 	return
+}
+
+func timeToSleepFor(thenDay, thenTime string) (time.Duration, error) {
+	thenDate, err := thenDate(thenDay, thenTime)
+	if err != nil {
+		return 0, err
+	}
+	return thenDate.Sub(time.Now()), nil
+}
+
+func thenDate(thenDay, thenTime string) (time.Time, error) {
+	cmd := exec.Command("date", "--rfc-2822", "--date", thenDay+" "+thenTime)
+	var cmdResult bytes.Buffer
+	cmd.Stdout = &cmdResult
+	err := cmd.Run()
+	if err != nil {
+		return time.Now(), err
+	}
+	then, err := time.Parse(time.RFC1123Z, strings.TrimSuffix(cmdResult.String(), "\n"))
+	if err != nil {
+		return time.Now(), err
+	}
+	return then, nil
 }
