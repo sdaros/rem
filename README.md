@@ -1,6 +1,8 @@
 # REM
 
-Add reminders using a simple API.
+With REM you can send yourself (or somebody else) a reminder. 
+
+All you need to do is let REM run as a daemon on a server somewhere and just navigate to the URL with your browser and your good to go!
 
 **Examples**
 
@@ -10,7 +12,7 @@ Add reminders using a simple API.
 https://cip.li/rem?time=1800&message=buy milk
 ```
 
-- You want to remind me to wish you a happy birthday this Saturday at 13:00 since I never check Facebook?
+- You want to remind [me](https://cip.li/people/stefano) to wish you a happy birthday this Saturday at 13:00 since I never check Facebook?
 
 ```
 https://cip.li/rem?time=1300&day=saturday&message=Wish me a Happy Birthday!
@@ -22,7 +24,7 @@ Rem uses the Unix `date` command in the background, so you can use its syntax to
 
 Feel free to use the precompiled binary that is supplied with the repo, or just `go build` your own instead.
 
-## Using rem with [Uberspace](https://uberspace.de/prices)
+## Using REM with [Uberspace](https://uberspace.de/prices)
 
 After logging into to your uberspace account via ssh, you will have to setup Proxy-Rewrite for apache and then daemontools to manage *rem*.
 
@@ -47,7 +49,7 @@ RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
 [~]$ uberspace-setup-service my-rem ~/bin/rem
 ```
 
-## Configuring the script that rem will execute
+## Configuring the script that REM will execute
 
 The script will send a reminder to my smartphone using the Pushover service. I chose Pushover because of their simple API.
 
