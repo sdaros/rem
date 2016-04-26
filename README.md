@@ -4,7 +4,7 @@ With REM you can send yourself (or somebody else) a reminder.
 
 All you need to do is let REM run as a daemon on a server somewhere and just navigate to the URL with your browser and your good to go!
 
-**Examples**
+##### Examples
 
 - You want to remind yourself to buy milk after work today? Just visit the following link with your browser.
 
