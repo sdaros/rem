@@ -30,7 +30,7 @@ func AddReminder() http.Handler {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Your command has been added to the queue. Thank you."))
+		w.Write([]byte("Your reminder has been added. Thank you."))
 		go func(time.Duration, string) {
 			select {
 			case <-time.After(delay):
