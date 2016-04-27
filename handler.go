@@ -35,8 +35,9 @@ func CreateReminderViaForm(app *App) http.Handler {
 			ReminderSuccess string
 			Path            string
 		}
+		path := app.Lookup("path").(string)
 		renderTemplate(w, "create",
-			&data{"Your reminder has been added, thank you!", ""}, app)
+			&data{"Your reminder has been added, thank you!", path}, app)
 		return
 	})
 }
