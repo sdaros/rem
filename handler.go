@@ -13,8 +13,13 @@ import (
 func CreateReminder(app *App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isQueryParamsEmpty(r) {
+			type data struct {
+				ReminderSuccess string
+				Path            string
+			}
+			path := app.Lookup("path").(string)
 			w.WriteHeader(http.StatusOK)
-			renderTemplate(w, "create", nil, app)
+			renderTemplate(w, "create", &data{"", path}, app)
 			return
 		}
 		submitReminder(w, r, app)
@@ -28,9 +33,10 @@ func CreateReminderViaForm(app *App) http.Handler {
 		submitReminder(w, r, app)
 		type data struct {
 			ReminderSuccess string
+			Path            string
 		}
 		renderTemplate(w, "create",
-			&data{"Your reminder has been added, thank you!"}, app)
+			&data{"Your reminder has been added, thank you!", ""}, app)
 		return
 	})
 }
