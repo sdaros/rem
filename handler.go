@@ -10,66 +10,56 @@ import (
 	"time"
 )
 
+type templateData struct {
+	ReminderSuccess string
+	Path            string
+	DocumentRoot    string
+	RemScript       string
+}
+
 func CreateReminder(app *App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isQueryParamsEmpty(r) {
-			type data struct {
-				ReminderSuccess string
-				Path            string
-			}
-			path := app.Lookup("path").(string)
-			w.WriteHeader(http.StatusOK)
-			renderTemplate(w, "create", &data{"", path}, app)
+		data := initialiseTemplateData(w, app)
+		switch r.Method {
+		case "GET":
+			renderTemplate(w, "create", data)
+			return
+		case "POST":
+			submitReminder(w, r, data)
 			return
 		}
-		submitReminder(w, r, app)
-		return
 	})
 }
 
-func CreateReminderViaForm(app *App) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		submitReminder(w, r, app)
-		type data struct {
-			ReminderSuccess string
-			Path            string
-		}
-		path := app.Lookup("path").(string)
-		renderTemplate(w, "create",
-			&data{"Your reminder has been added, thank you!", path}, app)
-		return
-	})
+func initialiseTemplateData(w http.ResponseWriter, app *App) *templateData {
+	path := app.Lookup("path").(string)
+	documentRoot := app.Lookup("documentRoot").(string)
+	reminderSuccess := ""
+	remScript := app.Lookup("home").(string) + "/bin/rem_script"
+	return &templateData{reminderSuccess, path, documentRoot, remScript}
 }
 
-func submitReminder(w http.ResponseWriter, r *http.Request, app *App) {
-	thenDay := r.URL.Query().Get("day")
-	if thenDay == "" {
-		thenDay = r.FormValue("day")
-	}
-	thenTime := r.URL.Query().Get("time")
-	if thenTime == "" {
-		thenTime = r.FormValue("time")
-	}
-	message := r.URL.Query().Get("message")
-	if message == "" {
-		message = r.FormValue("message")
-	}
+func submitReminder(w http.ResponseWriter, r *http.Request, data *templateData) {
+	thenDay := r.FormValue("day")
+	thenTime := r.FormValue("time")
+	message := r.FormValue("message")
 	delay, err := timeToSleepFor(thenDay, thenTime)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	data.ReminderSuccess = "Your reminder has been added, thank you!"
+	renderTemplate(w, "create", data)
 	log.Printf("The reminder '%v' will be sent to you at %v", message, time.Now().Add(delay))
-	go func(time.Duration, *App, string) {
+	go func(time.Duration, *templateData, string) {
 		select {
 		case <-time.After(delay):
-			execute(app, message)
+			execute(data, message)
 		}
-	}(delay, app, message)
+	}(delay, data, message)
 }
 
-func execute(app *App, msg string) {
-	cmd := exec.Command(app.Lookup("home").(string)+"/bin/rem_script", msg)
+func execute(data *templateData, msg string) {
+	cmd := exec.Command(data.RemScript, msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
@@ -102,18 +92,11 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 	return then, nil
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}, app *App) {
-	documentRoot := app.Lookup("documentRoot").(string)
-	path := app.Lookup("path").(string)
-	t, _ := template.ParseFiles(documentRoot + "/" + path + "/" + tmpl + ".html")
-	t.Execute(w, data)
-}
-
-func isQueryParamsEmpty(r *http.Request) bool {
-	thenTime := r.URL.Query().Get("time")
-	message := r.URL.Query().Get("message")
-	if thenTime == "" || message == "" {
-		return true
+func renderTemplate(w http.ResponseWriter, tmpl string, data *templateData) {
+	t, err := template.ParseFiles(tmpl + ".html")
+	if err != nil {
+		t, _ = template.ParseFiles(data.DocumentRoot + "/" + data.Path + "/" + tmpl + ".html")
 	}
-	return false
+	w.WriteHeader(http.StatusOK)
+	t.Execute(w, data)
 }

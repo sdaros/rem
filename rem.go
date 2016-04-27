@@ -18,7 +18,6 @@ func main() {
 	getFromEnvOrSetDefaults(app)
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
-	mux.Handle("/save", CreateReminderViaForm(app))
 	log.Printf("Serving %v (version: %v) on %v%v", app.Lookup("name"),
 		app.Lookup("version"), app.Lookup("port"), app.Lookup("path"))
 	err := http.ListenAndServe(app.Lookup("port").(string), mux)
