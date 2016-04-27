@@ -4,25 +4,20 @@ import (
 	"bytes"
 	"log"
 	"net/http"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
 )
 
-func AddReminder() http.Handler {
+func AddReminder(app *App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isQueryParamsEmpty(r) {
+			path := app.Lookup("path").(string)
+			http.Redirect(w, r, path+"/create/", http.StatusFound)
+		}
 		thenDay := r.URL.Query().Get("day")
 		thenTime := r.URL.Query().Get("time")
 		message := r.URL.Query().Get("message")
-		if thenTime == "" {
-			http.Redirect(w, r, "https://github.com/sdaros/rem#rem", http.StatusTemporaryRedirect)
-			return
-		}
-		if message == "" {
-			http.Redirect(w, r, "https://github.com/sdaros/rem#rem", http.StatusTemporaryRedirect)
-			return
-		}
 		delay, err := timeToSleepFor(thenDay, thenTime)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -31,17 +26,17 @@ func AddReminder() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Your reminder has been added. Thank you."))
 		log.Printf("The reminder '%v' will be sent to you at %v", message, time.Now().Add(delay))
-		go func(time.Duration, string) {
+		go func(time.Duration, *App, string) {
 			select {
 			case <-time.After(delay):
-				execute(message)
+				execute(app, message)
 			}
-		}(delay, message)
+		}(delay, app, message)
 	})
 }
 
-func execute(msg string) {
-	cmd := exec.Command(os.Getenv("HOME")+"/bin/rem_script", msg)
+func execute(app *App, msg string) {
+	cmd := exec.Command(app.Lookup("home").(string)+"/bin/rem_script", msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
@@ -72,4 +67,13 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 		return time.Now(), err
 	}
 	return then, nil
+}
+
+func isQueryParamsEmpty(r *http.Request) bool {
+	thenTime := r.URL.Query().Get("time")
+	message := r.URL.Query().Get("message")
+	if thenTime == "" || message == "" {
+		return true
+	}
+	return false
 }
