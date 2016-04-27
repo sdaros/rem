@@ -17,8 +17,8 @@ func main() {
 	app.registry = make(map[string]interface{})
 	getFromEnvOrSetDefaults(app)
 	mux := http.NewServeMux()
-	mux.Handle("/", AddReminder(app))
-	mux.Handle("/create", CreateForm(app))
+	mux.Handle("/", CreateReminder(app))
+	mux.Handle("/save", CreateReminderViaForm(app))
 	log.Printf("Serving %v (version: %v) on %v%v", app.Lookup("name"),
 		app.Lookup("version"), app.Lookup("port"), app.Lookup("path"))
 	err := http.ListenAndServe(app.Lookup("port").(string), mux)
@@ -47,7 +47,7 @@ func (a *App) Lookup(k string) interface{} {
 }
 
 func getFromEnvOrSetDefaults(app *App) {
-	app.Register("version", "0.1.0")
+	app.Register("version", "0.2.0")
 	app.Register("name", "rem")
 	home := os.Getenv("HOME")
 	if home == "" {
