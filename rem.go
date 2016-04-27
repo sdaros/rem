@@ -25,7 +25,6 @@ func main() {
 	log.Fatal(err)
 
 }
-
 func (a *App) Register(k string, v interface{}) {
 	if a == nil {
 		return
@@ -54,6 +53,11 @@ func getFromEnvOrSetDefaults(app *App) {
 		log.Fatalln("HOME Environment variable not set.")
 	}
 	app.Register("home", home)
+	domain := os.Getenv("REM_DOMAIN")
+	if domain == "" {
+		domain = "cip.li"
+	}
+	app.Register("domain", domain)
 	port := os.Getenv("REM_PORT")
 	if port == "" {
 		port = "42888"
@@ -64,4 +68,10 @@ func getFromEnvOrSetDefaults(app *App) {
 		path = "/rem/"
 	}
 	app.Register("path", path)
+	documentRoot := os.Getenv("REM_DOCUMENT_ROOT")
+	if documentRoot == "" {
+		documentRoot = home + "/" + domain
+	}
+	app.Register("documentRoot", documentRoot)
+
 }

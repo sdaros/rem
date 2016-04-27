@@ -13,9 +13,8 @@ import (
 func CreateReminder(app *App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isQueryParamsEmpty(r) {
-			// then return a form to create a new reminder
 			w.WriteHeader(http.StatusOK)
-			renderTemplate(w, "create", nil)
+			renderTemplate(w, "create", nil, app)
 			return
 		}
 		submitReminder(w, r, app)
@@ -31,7 +30,7 @@ func CreateReminderViaForm(app *App) http.Handler {
 			ReminderSuccess string
 		}
 		renderTemplate(w, "create",
-			&data{"Your reminder has been added, thank you!"})
+			&data{"Your reminder has been added, thank you!"}, app)
 		return
 	})
 }
@@ -96,8 +95,9 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 	return then, nil
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	t, _ := template.ParseFiles(tmpl + ".html")
+func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}, app *App) {
+	documentRoot := app.Lookup("documentRoot").(string)
+	t, _ := template.ParseFiles(documentRoot + "/" + tmpl + ".html")
 	t.Execute(w, data)
 }
 
