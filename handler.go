@@ -97,7 +97,8 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}, app *App) {
 	documentRoot := app.Lookup("documentRoot").(string)
-	t, _ := template.ParseFiles(documentRoot + "/" + tmpl + ".html")
+	path := app.Lookup("path").(string)
+	t, _ := template.ParseFiles(documentRoot + "/" + path + "/" + tmpl + ".html")
 	t.Execute(w, data)
 }
 
