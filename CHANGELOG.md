@@ -1,6 +1,10 @@
 # REM Changelog
 
-## 0.2.0 /2016-04-27
+## 0.3.0 / 2016-04-28
+
+* Read configuration parameters from a config file
+
+## 0.2.0 / 2016-04-27
 
 * Provide a form for submitting new reminders
 

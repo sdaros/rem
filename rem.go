@@ -1,26 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 )
 
-type App struct {
-	registry map[string]interface{}
-	sync.Mutex
-}
+const (
+	version = "0.3.0"
+)
+
+type (
+	App struct {
+		registry map[string]interface{}
+		sync.Mutex
+	}
+	Config struct {
+		DocumentRoot     string
+		Path             string
+		Port             string
+		ReminderTemplate string
+		RemScript        string
+	}
+)
 
 func main() {
 	app := new(App)
 	app.registry = make(map[string]interface{})
-	getFromEnvOrSetDefaults(app)
+	loadConfigurationFile(app)
+	config := app.Lookup("config").(*Config)
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
-	log.Printf("Serving %v (version: %v) on %v%v", app.Lookup("name"),
-		app.Lookup("version"), app.Lookup("port"), app.Lookup("path"))
-	err := http.ListenAndServe(app.Lookup("port").(string), mux)
+	log.Printf("Serving rem (version: %v) on %v%v",
+		version, config.Port, config.Path)
+	err := http.ListenAndServe(config.Port, mux)
 	log.Fatal(err)
 
 }
@@ -44,33 +59,16 @@ func (a *App) Lookup(k string) interface{} {
 	return a.registry[k]
 }
 
-func getFromEnvOrSetDefaults(app *App) {
-	app.Register("version", "0.2.0")
-	app.Register("name", "rem")
-	home := os.Getenv("HOME")
-	if home == "" {
-		log.Fatalln("HOME Environment variable not set.")
+func loadConfigurationFile(app *App) {
+	file, err := os.Open("./rem.conf")
+	if err != nil {
+		log.Fatal("error: Configuration file not found!")
 	}
-	app.Register("home", home)
-	domain := os.Getenv("REM_DOMAIN")
-	if domain == "" {
-		domain = "cip.li"
+	decoder := json.NewDecoder(file)
+	config := new(Config)
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Fatalf("error parsing configuration file: %v", err)
 	}
-	app.Register("domain", domain)
-	port := os.Getenv("REM_PORT")
-	if port == "" {
-		port = "42888"
-	}
-	app.Register("port", ":"+port)
-	path := os.Getenv("REM_PATH")
-	if path == "" {
-		path = "/rem/"
-	}
-	app.Register("path", path)
-	documentRoot := os.Getenv("REM_DOCUMENT_ROOT")
-	if documentRoot == "" {
-		documentRoot = home + "/" + domain
-	}
-	app.Register("documentRoot", documentRoot)
-
+	app.Register("config", config)
 }
