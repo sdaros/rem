@@ -1,39 +1,34 @@
 # REM
 
-With REM you can send yourself (or somebody else) a reminder. 
+Use REM to send reminders to yourself, or someone else.
 
-All you need to do is let REM run as a daemon on a server somewhere and just navigate to the URL with your browser and your good to go!
-
-##### Examples
-
-- You want to remind yourself to buy milk after work today? Just visit the following link with your browser.
-
-```
-https://cip.li/rem?time=1800&message=buy milk
-```
-
-- You want to remind [me](https://cip.li/people/stefano) to wish you a happy birthday this Saturday at 13:00 since I never check Facebook?
-
-```
-https://cip.li/rem?time=1300&day=saturday&message=Wish me a Happy Birthday!
-```
+Just run the REM daemon on your server and go to the URL with your browser or `POST` to the API instead.
 
 Rem uses the Unix `date` command in the background, so you can use its syntax to choose a day and/or time.
+j
 
 ## Installation
 
-Feel free to use the precompiled binary that is supplied with the repo, or just `go build` your own instead.
+Let's assume you own the domain `cip.li` and you're using [Uberspace](https://uberspace.de) as your hosting provider. You're document root is located at `/home/user/cip.li` and you want to run REM on `https://cip.li/rem`.
 
-## Using REM with [Uberspace](https://uberspace.de/prices)
+### 1. Clone this github repo
 
-After logging into to your uberspace account via ssh, you will have to setup Proxy-Rewrite for apache and then daemontools to manage *rem*.
+#### Using Uberspace
 
-### HTTPS Proxying
-
-- Setup the .htaccess file on the document root
+- login via ssh and clone the repo
 
 ```bash
-[~]$ cat .htaccess
+[user@spica ~]$ git clone https://github.com/sdaros/rem ~/cip.li/
+```
+
+### 2. Setup HTTP Proxying and proxy `/rem` to the REM daemon
+
+#### Using Uberspace
+
+- Setup the .htaccess file on the document root like so
+
+```bash
+[user@spica ~]$ cat ~/cip.li/.htaccess
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteCond %{ENV:HTTPS} !=on
@@ -41,20 +36,24 @@ RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
 RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
 ```
 
-### Daemontools
+### 3. Configure REM to use a process supervisor
 
-- Setup daemontools to use the compiled binary from this repo
+#### Using Uberspace
+
+- Supervise/Run REM using daemontools
 
 ```bash
-[~]$ uberspace-setup-service my-rem ~/bin/rem
+[user@spica ~]$ uberspace-setup-service rem ~/cip.li/rem/rem
 ```
 
-## Configuring the script that REM will execute
+### 4. Provide a script for REM to execute
 
-The script will send a reminder to my smartphone using the Pushover service. I chose Pushover because of their simple API.
+#### Using [Pushover](https://pushover.net)
+
+- This script sends reminder to my smartphone using the [Pushover](https://pushover.net) API.
 
 ```bash
-[~]$ cat bin/rem_script
+[~]$ cat ~/cip.li/rem/rem_script
 #!/usr/bin/env bash
 TOKEN=<TOKEN>
 USER=<USER>
