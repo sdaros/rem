@@ -10,7 +10,7 @@ Rem uses the Unix `date` command in the background, so you can use its syntax to
 
 Let's assume you own the domain `cip.li` and you're using [Uberspace](https://uberspace.de) as your hosting provider. You're document root is located at `/home/user/cip.li` and you want to run REM on `https://cip.li/rem`.
 
-### 1. Clone this github repo
+### 1. Clone this github repo then edit the `rem.conf` config file
 
 #### Using Uberspace
 
@@ -18,6 +18,19 @@ Let's assume you own the domain `cip.li` and you're using [Uberspace](https://ub
 
 ```bash
 [user@spica ~]$ git clone https://github.com/sdaros/rem ~/cip.li/rem
+```
+
+- edit `rem.conf`
+
+```bash
+[user@spica ~]$ cat ~/cip.li/rem.conf
+{
+	"DocumentRoot": "/home/user/cip.li",
+	"Path": "/rem/",
+	"Port": ":42888",
+	"ReminderTemplate": "./create.html",
+	"RemScript": "./rem_script"
+}
 ```
 
 ### 2. Setup HTTP Proxying and proxy `/rem` to the REM daemon
