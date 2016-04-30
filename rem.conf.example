@@ -1,0 +1,8 @@
+{
+	"ApiToken": "a1VrLLmRMPStaX3pA8TPdh2Kl2QS3q",
+	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ",
+	"DocumentRoot": "/home/user/cip.li",
+	"Path": "/rem",
+	"Port": ":42888",
+	"RemScript": "/home/user/.config/rem/rem_script"
+}

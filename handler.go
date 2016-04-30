@@ -31,17 +31,15 @@ func CreateReminder(app *App) http.Handler {
 }
 
 func initialiseTemplateData(w http.ResponseWriter, app *App) *templateData {
-	config := app.Lookup("config").(*Config)
 	reminderSuccess := ""
 	// TODO: +30m
 	thirtyMinutesFromNow := time.Now().Add(time.Duration(30) * time.Minute)
 	defaultTime := thirtyMinutesFromNow.Format("15:04")
-	return &templateData{defaultTime, reminderSuccess, config.Path}
+	return &templateData{defaultTime, reminderSuccess, app.Path}
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}, app *App) {
-	config := app.Lookup("config").(*Config)
-	t, _ := template.ParseFiles(config.ReminderTemplate)
+	t, _ := template.ParseFiles(app.DocumentRoot + "create.html")
 	w.WriteHeader(http.StatusOK)
 	t.Execute(w, data)
 }
@@ -91,8 +89,7 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 }
 
 func execute(app *App, msg string) {
-	config := app.Lookup("config").(*Config)
-	cmd := exec.Command(config.RemScript, msg)
+	cmd := exec.Command(app.RemScript, msg)
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
