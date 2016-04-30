@@ -33,7 +33,7 @@ func main() {
 	}
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
-	log.Printf("Serving rem (version: %v) on %v%v",
+	log.Printf("Serving rem (version: %v) on %v/%v",
 		version, app.Port, app.Path)
 	err := http.ListenAndServe(app.Port, mux)
 	log.Fatal(err)
@@ -54,7 +54,8 @@ func loadConfigurationFile(app *App) {
 }
 
 func initScriptToStdout(app *App) {
-	t, err := template.ParseFiles(app.DocumentRoot + "/init_script.template")
+	initScript := app.DocumentRoot + "/" + app.Path + "/init_script.template"
+	t, err := template.ParseFiles(initScript)
 	if err != nil {
 		log.Fatalf("error parsing install.template file: %v", err)
 	}

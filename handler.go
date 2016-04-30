@@ -21,7 +21,7 @@ func CreateReminder(app *App) http.Handler {
 		data := initialiseTemplateData(w, app)
 		switch r.Method {
 		case "GET":
-			renderTemplate(w, "create", data, app)
+			renderTemplate(w, data, app)
 			return
 		case "POST":
 			submitReminder(w, r, data, app)
@@ -32,14 +32,17 @@ func CreateReminder(app *App) http.Handler {
 
 func initialiseTemplateData(w http.ResponseWriter, app *App) *templateData {
 	reminderSuccess := ""
-	// TODO: +30m
 	thirtyMinutesFromNow := time.Now().Add(time.Duration(30) * time.Minute)
 	defaultTime := thirtyMinutesFromNow.Format("15:04")
 	return &templateData{defaultTime, reminderSuccess, app.Path}
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}, app *App) {
-	t, _ := template.ParseFiles(app.DocumentRoot + "create.html")
+func renderTemplate(w http.ResponseWriter, data interface{}, app *App) {
+	templateFile := app.DocumentRoot + "/" + app.Path + "/create.html"
+	t, err := template.ParseFiles(templateFile)
+	if err != nil {
+		log.Fatal("error when rendering template: %v", err)
+	}
 	w.WriteHeader(http.StatusOK)
 	t.Execute(w, data)
 }
@@ -53,7 +56,7 @@ func submitReminder(w http.ResponseWriter, r *http.Request, data *templateData, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	data.ReminderSuccess = "Your reminder has been added, thank you!"
-	renderTemplate(w, "create", data, app)
+	renderTemplate(w, data, app)
 	log.Printf("The reminder '%v' will be sent to you at %v",
 		message, time.Now().Add(delay).Format(time.RFC3339))
 	go func(time.Duration, *App, string) {

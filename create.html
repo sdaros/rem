@@ -10,7 +10,7 @@
   <body>
     <h2>Send me a reminder!</h2>
     <p><strong>{{.ReminderSuccess}}</strong></p>
-    <form action="{{.Path}}" method="POST">
+    <form action="/{{.Path}}/" method="POST">
       <div>
         <label for="time">Time *: </label>
 	<input type="time" name="time" value="{{.DefaultTime}}">

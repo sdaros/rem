@@ -4,7 +4,7 @@ Use REM to send reminders to yourself, or someone else.
 
 Just run the REM daemon on your server and go to the URL with your browser or `POST` to the API instead.
 
-Rem uses the Unix `date` command in the background, so you can use its syntax to choose a day and/or time.
+Rem uses the Unix `date` command in the background, so you can use its syntax when choosing a datetime.
 
 ## Installation
 
@@ -14,48 +14,36 @@ Let's assume you own the domain `cip.li` and you're using [Uberspace](https://ub
 
 #### Using Uberspace
 
-- login via ssh and clone the repo
+- login via ssh and clone the repo to your document root
 
 ```bash
-[user@spica ~]$ git clone https://github.com/sdaros/rem ~/cip.li/rem
+[user@spica ~]$ git clone https://github.com/sdaros/rem ~/cip.li/rem && cd ~/cip.li/rem
 ```
 
-- edit `rem.conf`
+### 2. Customise the config file
+
+- customise `rem.conf.example` then copy it into `~/.config/rem/rem.conf`.
 
 ```bash
-[user@spica ~]$ cat ~/cip.li/rem.conf
+[user@spica ~/cip.li/rem]$ mkdir -p ~/.config/rem
+[user@spica ~/cip.li/rem]$ vim rem.conf.example # Configure it to suit your needs
+[user@spica ~/cip.li/rem]$ cp rem.conf.example ~/.config/rem/rem.conf && cat ~/.config/rem/rem.conf
 {
-	"DocumentRoot": "/home/user/cip.li",
-	"Path": "/rem/",
+	"ApiToken": "a1VrLLmRMPStaX3pA8TPdh2Kl2QS3q",
+	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ",
+	"DocumentRoot": "/home/bob/cip.li",
+	"Path": "/rem",
 	"Port": ":42888",
-	"ReminderTemplate": "./create.html",
-	"RemScript": "./rem_script"
+	"RemScript": "/home/user/.config/rem/rem_script"
 }
 ```
 
-### 2. Setup HTTP Proxying and proxy `/rem` to the REM daemon
+### 3. Run the REM init script if using Uberspace
 
-#### Using Uberspace
-
-- Setup the .htaccess file on the document root like so
+- `rem -init` will print the `init_script.template` bash script to standard out using the configuration parameters provided by `~/.config/rem/rem.conf`
 
 ```bash
-[user@spica ~]$ cat ~/cip.li/.htaccess
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteCond %{ENV:HTTPS} !=on
-RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
-RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
-```
-
-### 3. Configure REM to use a process supervisor
-
-#### Using Uberspace
-
-- Supervise/Run REM using daemontools
-
-```bash
-[user@spica ~]$ uberspace-setup-service rem ~/cip.li/rem/rem
+[user@spica ~/cip.li/rem]$ ./rem -init | bash
 Creating the ~/etc/run-rem/run service run script
 Creating the ~/etc/run-rem/log/run logging run script
 Symlinking ~/etc/run-rem to ~/service/rem to start the service
@@ -64,20 +52,4 @@ Waiting for the service to start ... 1 2 3 4 5 6 started!
 Congratulations - the ~/service/rem service is now ready to use!
 To control your service you'll need the svc command (hint: svc = service control):
 ...
-```
-
-### 4. Provide a script for REM to execute
-
-#### Using [Pushover](https://pushover.net)
-
-- This script sends reminder to my smartphone using the [Pushover](https://pushover.net) API.
-
-```bash
-[~]$ cat ~/cip.li/rem/rem_script
-#!/usr/bin/env bash
-TOKEN=<TOKEN>
-USER=<USER>
-MESSAGE=$1
-
-curl -s --form-string "token=${TOKEN}" --form-string "user=${USER}" --form-string "message=${MESSAGE}" https://api.pushover.net/1/messages.json
 ```
