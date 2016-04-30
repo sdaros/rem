@@ -8,7 +8,7 @@ Rem uses the Unix `date` command in the background, so you can use its syntax wh
 
 ## Installation
 
-Let's assume you own the domain `cip.li` and you're using [Uberspace](https://uberspace.de) as your hosting provider. You're document root is located at `/home/user/cip.li` and you want to run REM on `https://cip.li/rem`.
+Let's assume you own the domain `cip.li` and you're using [Uberspace](https://uberspace.de) as your hosting provider. You're user name is `bob`, the document root is located at `/home/bob/cip.li` and you want to run REM on `https://cip.li/rem`.
 
 ### 1. Clone this github repo then edit the `rem.conf` config file
 
