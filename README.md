@@ -4,7 +4,7 @@ Use REM to send reminders to yourself, or someone else.
 
 Just run the REM daemon on your server and go to the URL with your browser or `POST` to the API instead.
 
-Rem uses the Unix `date` command in the background, so you can use its syntax when choosing a datetime.
+Rem uses the GNU Coreutils `date` command in the background, so you can use its syntax when choosing a datetime. Notifications will be sent to your smartphone if you are using the [Pushover](http://pushover.net) service.
 
 ## Installation
 
@@ -29,27 +29,24 @@ Let's assume you own the domain `cip.li` and you're using [Uberspace](https://ub
 [user@spica ~/cip.li/rem]$ vim rem.conf.example # Configure it to suit your needs
 [user@spica ~/cip.li/rem]$ cp rem.conf.example ~/.config/rem/rem.conf && cat ~/.config/rem/rem.conf
 {
-	"ApiToken": "a1VrLLmRMPStaX3pA8TPdh2Kl2QS3q",
-	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ",
+	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
+	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
 	"DocumentRoot": "/home/bob/cip.li",
+        "NotificationApi": "https://api.pushover.net/1/messages.json",
 	"Path": "/rem",
-	"Port": ":42888",
-	"RemScript": "/home/user/.config/rem/rem_script"
+	"Port": ":42888"
 }
 ```
 
-### 3. Run the REM init script if using Uberspace
+### 3. Configure HTTP Proxying
 
-- `rem -init` will print the `init_script.template` bash script to standard out using the configuration parameters provided by `~/.config/rem/rem.conf`
+- Add the following to the .htaccess file in your Document Root (for our example `/home/bob/cip.li/.htaccess`)
 
 ```bash
-[user@spica ~/cip.li/rem]$ ./rem -init | bash
-Creating the ~/etc/run-rem/run service run script
-Creating the ~/etc/run-rem/log/run logging run script
-Symlinking ~/etc/run-rem to ~/service/rem to start the service
-Waiting for the service to start ... 1 2 3 4 5 6 started!
-
-Congratulations - the ~/service/rem service is now ready to use!
-To control your service you'll need the svc command (hint: svc = service control):
-...
+[user@spica ~/cip.li/rem]$ cat /home/bob/cip.li/.htaccess
+RewriteEngine On
+-RewriteCond %{HTTPS} !=on
+-RewriteCond %{ENV:HTTPS} !=on
+-RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
+-RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
 ```
