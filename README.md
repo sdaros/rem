@@ -2,7 +2,7 @@
 
 Use REM to send reminders to yourself, or someone else.
 
-Just run the REM daemon on your server (or [build as a docker image](https://docs.docker.com/engine/understanding-docker/)) then go to the URL with your browser or `POST` to the API instead.
+Just run the REM daemon on your server then go to the URL with your browser or `POST` to the API instead.
 
 Rem uses the GNU Coreutils `date` command in the background, so you can use its syntax when choosing a datetime. Notifications will be sent to your smartphone if you are using the [Pushover](http://pushover.net) service.
 
