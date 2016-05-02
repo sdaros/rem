@@ -10,12 +10,3 @@ RewriteRule ^{{.Path}}/(.*) http://localhost{{.Port}}/$1 [P]
 
 # Configure REM to use daemontools
 uberspace-setup-service rem {{.DocumentRoot}}/{{.Path}}/rem
-
-# Configure REM to use pushover in execute script
-echo '#!/usr/bin/env bash
-TOKEN={{.ApiToken}}
-USER={{.ApiUser}}
-MESSAGE=$1
-
-curl -s --form-string "token=${TOKEN}" --form-string "user=${USER}" --form-string "message=${MESSAGE}" https://api.pushover.net/1/messages.json
-' > {{.RemScript}} && chmod +x {{.RemScript}}

@@ -14,12 +14,12 @@ const (
 )
 
 type App struct {
-	DocumentRoot string
-	Path         string
-	Port         string
-	RemScript    string
-	ApiToken     string
-	ApiUser      string
+	ApiToken        string
+	ApiUser         string
+	DocumentRoot    string
+	NotificationApi string
+	Path            string
+	Port            string
 }
 
 func main() {

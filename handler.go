@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os/exec"
 	"strings"
 	"time"
@@ -53,10 +55,10 @@ func submitReminder(w http.ResponseWriter, r *http.Request, data *templateData, 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	data.ReminderSuccess = "Your reminder has been added, thank you!"
+	thenDateTime := time.Now().Add(delay).Format("2006-01-02 15:04:05-07:00")
+	data.ReminderSuccess = "Thank you! Your reminder will be sent at " + thenDateTime
 	renderTemplate(w, data, app)
-	log.Printf("The reminder '%v' will be sent to you at %v",
-		message, time.Now().Add(delay).Format(time.RFC3339))
+	log.Printf("The reminder '%v' will be sent at %v", message, thenDateTime)
 	go func(time.Duration, *App, string) {
 		select {
 		case <-time.After(delay):
@@ -90,10 +92,15 @@ func thenDate(thenDay, thenTime string) (time.Time, error) {
 }
 
 func execute(app *App, msg string) {
-	cmd := exec.Command(app.RemScript, msg)
-	var cmdResult bytes.Buffer
-	cmd.Stdout = &cmdResult
-	err := cmd.Run()
-	die("error: %v", err)
+	resp, err := http.PostForm(app.NotificationApi,
+		url.Values{"token": {app.ApiToken},
+			"user":    {app.ApiUser},
+			"message": {msg}})
+	die("error when using Notification API: %v", err)
+	defer resp.Body.Close()
+	if resp.Status != "200 OK" {
+		die("error when using Notification API: %v",
+			errors.New(resp.Status))
+	}
 	return
 }
