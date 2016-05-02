@@ -40,9 +40,7 @@ func initialiseTemplateData(w http.ResponseWriter, app *App) *templateData {
 func renderTemplate(w http.ResponseWriter, data interface{}, app *App) {
 	templateFile := app.DocumentRoot + "/" + app.Path + "/create.html"
 	t, err := template.ParseFiles(templateFile)
-	if err != nil {
-		log.Fatal("error when rendering template: %v", err)
-	}
+	die("error when rendering template: %v", err)
 	w.WriteHeader(http.StatusOK)
 	t.Execute(w, data)
 }
@@ -96,8 +94,6 @@ func execute(app *App, msg string) {
 	var cmdResult bytes.Buffer
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	die("error: %v", err)
 	return
 }

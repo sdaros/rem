@@ -43,21 +43,21 @@ func main() {
 func loadConfigurationFile(app *App) {
 	home := os.Getenv("HOME")
 	configFile, err := os.Open(home + "/.config/rem/rem.conf")
-	if err != nil {
-		log.Fatal("error: Configuration file not found!")
-	}
+	die("error: Configuration file not found!", err)
 	decoder := json.NewDecoder(configFile)
 	err = decoder.Decode(&app)
-	if err != nil {
-		log.Fatalf("error parsing configuration file: %v", err)
-	}
+	die("error parsing configuration file: %v", err)
 }
 
 func initScriptToStdout(app *App) {
 	initScript := app.DocumentRoot + "/" + app.Path + "/init_script.template"
 	t, err := template.ParseFiles(initScript)
-	if err != nil {
-		log.Fatalf("error parsing install.template file: %v", err)
-	}
+	die("error parsing install.template file: %v", err)
 	t.Execute(os.Stdout, app)
+}
+
+func die(format string, err error) {
+	if err != nil {
+		log.Fatalf(format, err)
+	}
 }
