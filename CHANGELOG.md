@@ -1,5 +1,9 @@
 # REM Changelog
 
+## 0.4.0 / 2016-05-02
+
+* Add Dockerfile
+
 ## 0.3.0 / 2016-04-28
 
 * Read configuration parameters from a config file
