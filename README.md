@@ -40,13 +40,13 @@ Let's assume you own the domain `cip.li` and you're using [Uberspace](https://ub
 
 ### 3. Configure HTTP Proxying
 
-- Add the following to the .htaccess file in your Document Root (for our example `/home/bob/cip.li/.htaccess`)
+- If using Uberspace simply add an .htaccess file to your Document Root
 
 ```bash
 [user@spica ~/cip.li/rem]$ cat /home/bob/cip.li/.htaccess
 RewriteEngine On
--RewriteCond %{HTTPS} !=on
--RewriteCond %{ENV:HTTPS} !=on
--RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
--RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{ENV:HTTPS} !=on
+RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
+RewriteRule ^rem/(.*) http://localhost:42888/$1 [P]
 ```
