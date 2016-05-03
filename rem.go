@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	version = "0.4.0"
+	version = "0.5.0"
 )
 
 type App struct {
@@ -18,7 +18,6 @@ type App struct {
 	NotificationApi string
 	Path            string
 	Port            string
-	Timezone        string
 }
 
 func main() {
