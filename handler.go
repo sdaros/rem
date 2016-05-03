@@ -24,7 +24,6 @@ type Reminder struct {
 func CreateReminder(app *App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reminder := newReminder(app)
-		reminder.DefaultTime = DefaultTime(r)
 		switch r.Method {
 		case "GET":
 			renderTemplate(w, reminder)
@@ -37,9 +36,11 @@ func CreateReminder(app *App) http.Handler {
 }
 
 func newReminder(app *App) *Reminder {
+	thirtyMinutesFromNow := time.Now().Add(time.Duration(30) * time.Minute)
 	return &Reminder{
-		App:        app,
-		SuccessMsg: "",
+		App:         app,
+		SuccessMsg:  "",
+		DefaultTime: thirtyMinutesFromNow.Format("15:04"),
 	}
 }
 
@@ -89,6 +90,7 @@ func thenDate(rem *Reminder) (time.Time, error) {
 	cmd.Stdout = &cmdResult
 	err := cmd.Run()
 	if err != nil {
+		log.Printf("error: %v", cmd)
 		return time.Now(), err
 	}
 	then, err := time.Parse("2006-01-02 15:04:05-07:00",

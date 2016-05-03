@@ -1,9 +1,5 @@
 # REM Changelog
 
-## 0.5.0 / 2016-05-03
-
-* Use client timezone when determining the default 'time' form value
-
 ## 0.4.0 / 2016-05-02
 
 * Add Dockerfile
