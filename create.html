@@ -27,8 +27,14 @@
     <script>
       now = new Date();
       then = new Date(now.getTime() + 30*60000);
-      inThirtyMinutes = then.getHours() + ":" + then.getMinutes();
+      inThirtyMinutes = addZero(then.getHours()) + ":" + addZero(then.getMinutes());
       document.getElementById("time").setAttribute("value", inThirtyMinutes);
+      function addZero(i) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        return i;
+      }
     </script>
   </body>
 </html>
