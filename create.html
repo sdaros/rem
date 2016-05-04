@@ -25,8 +25,9 @@
       <div><input type="submit" value="Submit"></div>
     </form>
     <script>
-      d = new Date();
-      inThirtyMinutes = d.getHours() + ":" + (d.getMinutes() + 30);
+      now = new Date();
+      then = new Date(now.getTime() + 30*60000);
+      inThirtyMinutes = then.getHours() + ":" + then.getMinutes();
       document.getElementById("time").setAttribute("value", inThirtyMinutes);
     </script>
   </body>
