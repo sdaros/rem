@@ -14,7 +14,6 @@ import (
 
 type Reminder struct {
 	*App
-	DefaultTime string
 	ReminderMsg string
 	SuccessMsg  string
 	ThenDay     string
@@ -36,11 +35,9 @@ func CreateReminder(app *App) http.Handler {
 }
 
 func newReminder(app *App) *Reminder {
-	thirtyMinutesFromNow := time.Now().Add(time.Duration(30) * time.Minute)
 	return &Reminder{
-		App:         app,
-		SuccessMsg:  "",
-		DefaultTime: thirtyMinutesFromNow.Format("15:04"),
+		App:        app,
+		SuccessMsg: "",
 	}
 }
 
