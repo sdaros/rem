@@ -2,7 +2,6 @@
 <html class="no-js" lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Send me a reminder</title>
     <meta name="description" content="Add reminders through a simple API ">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,7 +12,7 @@
     <form action="/{{.Path}}/" method="POST">
       <div>
         <label for="time">Time *: </label>
-	<input type="time" name="time" value="{{.DefaultTime}}">
+	<input id="time" type="time" name="time" value="">
       </div>
       <div>
         <label for="message">Message *: </label>
@@ -25,5 +24,10 @@
       </div>
       <div><input type="submit" value="Submit"></div>
     </form>
+    <script>
+      d = new Date();
+      inThirtyMinutes = d.getHours() + ":" + (d.getMinutes() + 30);
+      document.getElementById("time").setAttribute("value", inThirtyMinutes);
+    </script>
   </body>
 </html>
