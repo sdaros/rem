@@ -66,7 +66,7 @@ func submitReminder(w http.ResponseWriter, r *http.Request, rem *Reminder) {
 		}
 	}(delay, rem)
 
-	thenDateTime := time.Now().Add(delay).Format("2006-01-02 15:04:05-07:00")
+	thenDateTime := time.Now().Add(delay).Format("2006-01-02 15:04:05")
 	rem.SuccessMsg = "Thank you! Your reminder will be sent at " + thenDateTime
 	renderTemplate(w, rem)
 	log.Printf("The reminder '%v' will be sent at %v", rem.ReminderMsg, thenDateTime)
