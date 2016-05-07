@@ -15,10 +15,10 @@ type App struct {
 	ApiToken        string
 	ApiUser         string
 	DocumentRoot    string
+	Domain          string
 	NotificationApi string
 	Path            string
 	Port            string
-	Timezone        string
 }
 
 func main() {
