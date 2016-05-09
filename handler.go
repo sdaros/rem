@@ -82,9 +82,7 @@ func validateClientInput(r *http.Request, rem *Reminder) error {
 }
 
 func sendReminder(r *http.Request, rem *Reminder) {
-	loc := make(chan string)
-	loc = detectClientLocation(r)
-	log.Printf("loc: %v", loc)
+	loc := detectClientLocation(r)
 	delay, err := calculateDelay(loc, rem)
 	die("error parsing datetime provided by client: %v", err)
 	go func(time.Duration, *Reminder) {
@@ -96,24 +94,26 @@ func sendReminder(r *http.Request, rem *Reminder) {
 	return
 }
 
-func detectClientLocation(r *http.Request) (location chan string) {
+func detectClientLocation(r *http.Request) (location string) {
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	resp, err := http.Get("https://freegeoip.net/json/" + ip)
+	resp, err := http.Get("http://freegeoip.net/json/" + ip)
 	die("error while trying to geolocate client IP: %v", err)
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	type freegeoipJson struct {
-		time_zone string
+		Time_zone string
 	}
 	jsonResp := new(freegeoipJson)
 	err = decoder.Decode(&jsonResp)
 	die("error while trying to parse json response: %v", err)
-	location <- jsonResp.time_zone
-	return
+	if jsonResp.Time_zone == "" {
+		log.Printf("info: client timezone not detected, defaulting to UTC")
+	}
+	return jsonResp.Time_zone
 }
 
-func calculateDelay(loc <-chan string, rem *Reminder) (time.Duration, error) {
-	locationOfClient, err := time.LoadLocation(<-loc)
+func calculateDelay(loc string, rem *Reminder) (time.Duration, error) {
+	locationOfClient, err := time.LoadLocation(loc)
 	die("error while parsing freegeoip location: %v", err)
 	then, err := time.ParseInLocation("2006-01-02 15:04",
 		rem.ThenDate+" "+rem.ThenTime, locationOfClient)
@@ -122,10 +122,9 @@ func calculateDelay(loc <-chan string, rem *Reminder) (time.Duration, error) {
 	}
 	now := time.Now().In(locationOfClient)
 	delay := then.Sub(now)
-	logNewReminder(delay, rem)
+	logNewReminderAt(now, delay, rem.ReminderMsg)
 	return delay, nil
 }
-
 func sendReminderToNotificationApi(rem *Reminder) {
 	resp, err := http.PostForm(rem.NotificationApi,
 		url.Values{"token": {rem.ApiToken},
@@ -140,9 +139,8 @@ func sendReminderToNotificationApi(rem *Reminder) {
 	return
 }
 
-func logNewReminder(delay time.Duration, rem *Reminder) {
-	thenDateTime := rem.ThenDate + " " + rem.ThenTime
-	log.Printf("The reminder '%v' will be sent at %v", rem.ReminderMsg, thenDateTime)
+func logNewReminderAt(now time.Time, delay time.Duration, msg string) {
+	log.Printf("The reminder '%v' will be sent at %v", msg, now.Add(delay))
 	return
 }
 
