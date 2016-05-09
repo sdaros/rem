@@ -30,7 +30,6 @@ func main() {
 		version, app.Port, app.Path)
 	err := http.ListenAndServe(app.Port, mux)
 	log.Fatal(err)
-
 }
 
 func loadConfigurationFile(app *App) {
