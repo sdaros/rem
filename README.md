@@ -4,7 +4,7 @@ Use REM to send reminders to yourself, or someone else.
 
 Just run the REM daemon on your server then go to the URL with your browser or `POST` to the API instead.
 
-Rem uses the GNU Coreutils `date` command in the background, so you can use its syntax when choosing a datetime. Notifications will be sent to your smartphone if you are using the [Pushover](http://pushover.net) service.
+Notifications will be sent to your smartphone if you are using the [Pushover](http://pushover.net) service.
 
 ## Installation
 
@@ -32,6 +32,7 @@ Let's assume you own the domain `cip.li` and you're using [Uberspace](https://ub
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
 	"DocumentRoot": "/home/bob/cip.li",
+        "Domain": "https://cip.li",
         "NotificationApi": "https://api.pushover.net/1/messages.json",
 	"Path": "/rem",
 	"Port": ":42888"
