@@ -25,8 +25,7 @@ func (self *Notification) Notify() error {
 	}
 	defer resp.Body.Close()
 	if resp.Status != "200 OK" {
-		err := "error when using Notification API, got: " + resp.Status
-		return errors.New(err)
+		return errors.New(resp.Status)
 	}
 	return nil
 }
