@@ -111,7 +111,7 @@ func (self *Reminder) detectClientLocation(r *http.Request) (location string) {
 		self.notifyTheError("error when trying to parse json response: " + err.Error())
 	}
 	if jsonResp.Time_zone == "" {
-		self.notifyTheError("error: timezone from freegeoip was empty!" + err.Error())
+		self.notifyTheError("error: timezone from freegeoip was empty!")
 	}
 	return jsonResp.Time_zone
 }
