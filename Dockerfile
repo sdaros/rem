@@ -8,6 +8,5 @@ RUN apk add --no-cache ca-certificates && \
     mkdir -p rem .config/rem
 EXPOSE 42888
 COPY rem.conf .config/rem/rem.conf
-COPY create.html rem/create.html
 COPY rem /usr/local/bin/rem
 ENTRYPOINT rem
