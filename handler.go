@@ -85,7 +85,10 @@ func (self *Reminder) validateClientInput(r *http.Request) error {
 
 func (self *Reminder) sendReminder(r *http.Request) {
 	loc := self.detectClientLocation(r)
-	delay := self.calculateNotificationDelay(loc)
+	delay, err := self.calculateNotificationDelay(loc)
+	if err != nil {
+		self.notifyTheError("error when trying to calculate delay: " + err.Error())
+	}
 	select {
 	case <-time.After(delay):
 		err := self.Notification.Notify()
@@ -111,26 +114,26 @@ func (self *Reminder) detectClientLocation(r *http.Request) (location string) {
 		self.notifyTheError("error when trying to parse json response: " + err.Error())
 	}
 	if jsonResp.Time_zone == "" {
-		self.notifyTheError("error: timezone from freegeoip was empty!")
+		self.notifyTheError("error: unable to detect client timezone. " +
+			"Reminder '" + r.FormValue("message") + "' will not be sent!")
 	}
 	return jsonResp.Time_zone
 }
 
-func (self *Reminder) calculateNotificationDelay(loc string) time.Duration {
+func (self *Reminder) calculateNotificationDelay(loc string) (time.Duration, error) {
 	locationOfClient, err := time.LoadLocation(loc)
 	if err != nil {
-		self.notifyTheError("error when using autodetected location: " + err.Error())
+		return 0, err
 	}
 	then, err := time.ParseInLocation("2006-01-02 15:04",
 		self.ThenDate+" "+self.ThenTime, locationOfClient)
 	if err != nil {
-		self.notifyTheError("error when parsing autodetected location: " + err.Error())
-		return 0
+		return 0, err
 	}
 	now := time.Now().In(locationOfClient)
 	delay := then.Sub(now)
 	logReminder(now, delay, self.Message)
-	return delay
+	return delay, nil
 }
 
 func logReminder(now time.Time, delay time.Duration, msg string) {
