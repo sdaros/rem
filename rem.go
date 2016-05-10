@@ -12,17 +12,16 @@ const (
 )
 
 type App struct {
-	ApiToken        string
-	ApiUser         string
-	DocumentRoot    string
-	Domain          string
-	NotificationApi string
-	Path            string
-	Port            string
+	*Notification
+	DocumentRoot string
+	Domain       string
+	Path         string
+	Port         string
 }
 
 func main() {
 	app := new(App)
+	app.Notification = new(Notification)
 	loadConfigurationFile(app)
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))

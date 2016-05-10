@@ -2,23 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
 
 type Reminder struct {
-	*App
-	ReminderMsg string
-	SuccessMsg  string
-	ThenDate    string
-	ThenTime    string
-	InputType   string
+	*Notification
+	TemplateData *Template
+	ThenDate     string
+	ThenTime     string
 }
 
 func CreateReminder(app *App) http.Handler {
@@ -26,10 +22,13 @@ func CreateReminder(app *App) http.Handler {
 		reminder := newReminder(app)
 		switch r.Method {
 		case "GET":
-			renderTemplate(w, r, reminder)
+			if matchesAndroidBrowserUserAgent(r) {
+				reminder.TemplateData.fallbackToFormInputTypeText()
+			}
+			reminder.renderTemplate(w)
 			return
 		case "POST":
-			submitReminder(w, r, reminder)
+			reminder.submit(w, r)
 			return
 		}
 	})
@@ -37,109 +36,104 @@ func CreateReminder(app *App) http.Handler {
 
 func newReminder(app *App) *Reminder {
 	return &Reminder{
-		App:        app,
-		SuccessMsg: "",
-		InputType:  "time",
+		Notification: app.Notification,
+		TemplateData: &Template{
+			SuccessMsg: "",
+			InputType:  "time",
+			Domain:     app.Domain,
+			Path:       app.Path,
+		},
 	}
 }
 
-func renderTemplate(w http.ResponseWriter, r *http.Request, rem *Reminder) {
-	templateFile := rem.DocumentRoot + "/" + rem.Path + "/create.html"
-	t, err := template.ParseFiles(templateFile)
+func (self *Reminder) renderTemplate(w http.ResponseWriter) {
+	tmpl, err := template.New("createReminder").Parse(createReminderTemplate)
 	die("error when rendering template: %v", err)
-	if matchesAndroidBrowserUserAgent(r) {
-		fallbackToFormInputTypeText(rem)
-	}
 	w.WriteHeader(http.StatusOK)
-	t.Execute(w, rem)
+	err = tmpl.ExecuteTemplate(w, "createReminder", self.TemplateData)
+	die("error when executing template: %v", err)
+	return
 }
 
-func submitReminder(w http.ResponseWriter, r *http.Request, rem *Reminder) {
-	if err := validateClientInput(r, rem); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func (self *Reminder) submit(w http.ResponseWriter, r *http.Request) {
+	if err := self.validateClientInput(r); err != nil {
+		http.Error(w, "Sorry, we were unable to process your Input.",
+			http.StatusInternalServerError)
 		return
 	}
-	go sendReminder(r, rem)
+	go self.sendReminder(r)
 	if isAjaxRequest(r) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	rem.SuccessMsg = "Thank you! Your reminder will be sent at " +
-		rem.ThenDate + " " + rem.ThenTime
-	renderTemplate(w, r, rem)
+	self.TemplateData.SuccessMsg = "Thank you! Your reminder will be sent at " +
+		self.ThenDate + " " + self.ThenTime
+	self.renderTemplate(w)
 	return
 }
 
-func validateClientInput(r *http.Request, rem *Reminder) error {
-	rem.ThenDate = r.FormValue("date")
-	rem.ThenTime = r.FormValue("time")
-	rem.ReminderMsg = r.FormValue("message")
-	_, err := time.Parse("2006-01-02 15:04", rem.ThenDate+" "+rem.ThenTime)
+func (self *Reminder) validateClientInput(r *http.Request) error {
+	self.ThenDate = r.FormValue("date")
+	self.ThenTime = r.FormValue("time")
+	self.Message = r.FormValue("message")
+	_, err := time.Parse("2006-01-02 15:04", self.ThenDate+" "+self.ThenTime)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func sendReminder(r *http.Request, rem *Reminder) {
-	loc := detectClientLocation(r)
-	delay, err := calculateDelay(loc, rem)
-	die("error parsing datetime provided by client: %v", err)
-	go func(time.Duration, *Reminder) {
-		select {
-		case <-time.After(delay):
-			sendReminderToNotificationApi(rem)
-		}
-	}(delay, rem)
+func (self *Reminder) sendReminder(r *http.Request) {
+	loc := self.detectClientLocation(r)
+	delay := self.calculateNotificationDelay(loc)
+	select {
+	case <-time.After(delay):
+		err := self.Notification.Notify()
+		die("error when using Notification API, got: %v", err)
+	}
 	return
 }
 
-func detectClientLocation(r *http.Request) (location string) {
+func (self *Reminder) detectClientLocation(r *http.Request) (location string) {
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	resp, err := http.Get("http://freegeoip.net/json/" + ip)
-	die("error while trying to geolocate client IP: %v", err)
+	if err != nil {
+		self.notifyTheError("error when trying to geolocate client IP: " +
+			err.Error())
+	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	type freegeoipJson struct {
 		Time_zone string
 	}
 	jsonResp := new(freegeoipJson)
-	err = decoder.Decode(&jsonResp)
-	die("error while trying to parse json response: %v", err)
+	if err = decoder.Decode(&jsonResp); err != nil {
+		self.notifyTheError("error when trying to parse json response: " + err.Error())
+	}
 	if jsonResp.Time_zone == "" {
-		log.Printf("info: client timezone not detected, defaulting to UTC")
+		self.notifyTheError("error: timezone from freegeoip was empty!" + err.Error())
 	}
 	return jsonResp.Time_zone
 }
 
-func calculateDelay(loc string, rem *Reminder) (time.Duration, error) {
+func (self *Reminder) calculateNotificationDelay(loc string) time.Duration {
 	locationOfClient, err := time.LoadLocation(loc)
-	die("error while parsing freegeoip location: %v", err)
-	then, err := time.ParseInLocation("2006-01-02 15:04",
-		rem.ThenDate+" "+rem.ThenTime, locationOfClient)
 	if err != nil {
-		return 0, err
+		self.notifyTheError("error when using autodetected location: " + err.Error())
+	}
+	then, err := time.ParseInLocation("2006-01-02 15:04",
+		self.ThenDate+" "+self.ThenTime, locationOfClient)
+	if err != nil {
+		self.notifyTheError("error when parsing autodetected location: " + err.Error())
+		return 0
 	}
 	now := time.Now().In(locationOfClient)
 	delay := then.Sub(now)
-	logNewReminderAt(now, delay, rem.ReminderMsg)
-	return delay, nil
-}
-func sendReminderToNotificationApi(rem *Reminder) {
-	resp, err := http.PostForm(rem.NotificationApi,
-		url.Values{"token": {rem.ApiToken},
-			"user":    {rem.ApiUser},
-			"message": {rem.ReminderMsg}})
-	die("error when using Notification API: %v", err)
-	defer resp.Body.Close()
-	if resp.Status != "200 OK" {
-		die("error when using Notification API: %v",
-			errors.New(resp.Status))
-	}
-	return
+	logReminder(now, delay, self.Message)
+	return delay
 }
 
-func logNewReminderAt(now time.Time, delay time.Duration, msg string) {
+func logReminder(now time.Time, delay time.Duration, msg string) {
 	log.Printf("The reminder '%v' will be sent at %v", msg, now.Add(delay))
 	return
 }
@@ -158,8 +152,8 @@ func matchesAndroidBrowserUserAgent(r *http.Request) bool {
 	return false
 }
 
-func fallbackToFormInputTypeText(rem *Reminder) {
-	// Some versions of android's default browser do
-	// not handle <input type="time"> properly.
-	rem.InputType = "text"
+func (self *Reminder) notifyTheError(err string) {
+	self.Notification.Message = err
+	notifyErr := self.Notification.Notify()
+	die("%v", notifyErr)
 }
