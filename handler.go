@@ -163,9 +163,9 @@ func matchesAndroidBrowserUserAgent(r *http.Request) bool {
 }
 
 func getRealIp(r *http.Request) (ip string) {
-	if r.Header.Get("X-Real-IP") != "" {
-		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-		return ip
+	realIp := r.Header.Get("X-Real-IP")
+	if realIp != "" {
+		return realIp
 	}
 	ip, _, _ = net.SplitHostPort(r.RemoteAddr)
 	return ip
