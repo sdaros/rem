@@ -29,8 +29,8 @@ Customise `rem.conf.example`
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
 	"DocumentRoot": "/app",
-        "Domain": "https://cip.li",
-        "NotificationApi": "https://api.pushover.net/1/messages.json",
+	"Domain": "https://cip.li",
+	"NotificationApi": "https://api.pushover.net/1/messages.json",
 	"Path": "rem",
 	"Port": ":42888"
 }
