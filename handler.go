@@ -88,11 +88,14 @@ func (self *Reminder) sendReminder(r *http.Request) {
 	loc, err := self.detectClientLocation(r)
 	if err != nil {
 		self.notifyTheError(err.Error())
+		return
 	}
 	delay, err := self.calculateNotificationDelay(loc)
 	if err != nil {
 		self.notifyTheError("error: unable to calculate delay:  " + err.Error())
+		return
 	}
+	self.logNewReminder()
 	select {
 	case <-time.After(delay):
 		err := self.Notification.Notify()
@@ -136,12 +139,12 @@ func (self *Reminder) calculateNotificationDelay(loc string) (time.Duration, err
 	}
 	now := time.Now().In(locationOfClient)
 	delay := then.Sub(now)
-	logReminder(now, delay, self.Message)
 	return delay, nil
 }
 
-func logReminder(now time.Time, delay time.Duration, msg string) {
-	log.Printf("The reminder '%v' will be sent at %v", msg, now.Add(delay))
+func (self *Reminder) logNewReminder() {
+	log.Printf("The reminder '%v' will be sent at %v",
+		self.Message, self.ThenDate+" "+self.ThenTime)
 	return
 }
 
