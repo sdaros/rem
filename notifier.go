@@ -8,9 +8,9 @@ import (
 
 type (
 	Notification struct {
-		Api     string `json: "NotificationApi"`
-		Token   string `json: "ApiToken"`
-		User    string `json: "ApiUser"`
+		Api     string `json:"NotificationApi"`
+		Token   string `json:"ApiToken"`
+		User    string `json:"ApiUser"`
 		Message string
 	}
 )
