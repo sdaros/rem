@@ -105,8 +105,8 @@ func (self *Reminder) sendReminder(r *http.Request) {
 }
 
 func (self *Reminder) detectClientLocation(r *http.Request) (location string, err error) {
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	resp, err := http.Get("http://freegeoip.net/json/" + ip)
+	clientIp := getRealIp(r)
+	resp, err := http.Get("http://freegeoip.net/json/" + clientIp)
 	if err != nil {
 		return "", errors.New("error: unable to detect client timezone from IP: " +
 			err.Error())
@@ -160,6 +160,15 @@ func matchesAndroidBrowserUserAgent(r *http.Request) bool {
 		return true
 	}
 	return false
+}
+
+func getRealIp(r *http.Request) (ip string) {
+	if r.Header.Get("X-Real-IP") != "" {
+		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+		return ip
+	}
+	ip, _, _ = net.SplitHostPort(r.RemoteAddr)
+	return ip
 }
 
 func (self *Reminder) notifyTheError(err string) {
