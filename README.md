@@ -8,7 +8,7 @@ Notifications will be sent to your smartphone if you are using the [Pushover](ht
 
 ## Installation (Using Digitalocean)
 
-Let's assume you own the domain `cip.li` and you're using [Uberspace](https://uberspace.de) as your hosting provider. You're user name is `bob`, the document root is located at `/home/bob/cip.li` and you want to run REM on `https://cip.li/rem`.
+Let's assume you own the domain `cip.li` and you're using [Digitalocean](https://digitalocean.com) Docker droplet. You want the REM daemon to listen on `https://cip.li/rem`.
 
 ### 1. Create a Docker Droplet then clone the github repo
 
@@ -62,7 +62,9 @@ cip.li {
 [root@digitalocean ~/rem]$ docker-compose -p cipli up -d
 ```
 
-If you already have a reverse proxy setup, just build the rem docker image and start it
+### 4. If you already have a reverse proxy setup
+
+- run the REM docker image
 
 ```bash
 [root@digitalocean ~/rem]$ docker run -v ./rem.conf:/app/.config/rem/rem.conf -d -p 42888:42888 --name rem sdaros/rem
