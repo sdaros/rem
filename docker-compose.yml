@@ -16,7 +16,7 @@ services:
     expose:
       - 42888
     volumes:
-      - ./rem.conf.example:/app/.config/rem/rem.conf
+      - ./rem.conf:/app/.config/rem/rem.conf
     networks:
       - frontend
 
