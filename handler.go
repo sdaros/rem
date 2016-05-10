@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"html/template"
 	"log"
 	"net"
@@ -48,10 +49,10 @@ func newReminder(app *App) *Reminder {
 
 func (self *Reminder) renderTemplate(w http.ResponseWriter) {
 	tmpl, err := template.New("createReminder").Parse(createReminderTemplate)
-	die("error when rendering template: %v", err)
+	die("error: unable to render template: %v", err)
 	w.WriteHeader(http.StatusOK)
 	err = tmpl.ExecuteTemplate(w, "createReminder", self.TemplateData)
-	die("error when executing template: %v", err)
+	die("error: unable to execute template: %v", err)
 	return
 }
 
@@ -84,24 +85,27 @@ func (self *Reminder) validateClientInput(r *http.Request) error {
 }
 
 func (self *Reminder) sendReminder(r *http.Request) {
-	loc := self.detectClientLocation(r)
+	loc, err := self.detectClientLocation(r)
+	if err != nil {
+		self.notifyTheError(err.Error())
+	}
 	delay, err := self.calculateNotificationDelay(loc)
 	if err != nil {
-		self.notifyTheError("error when trying to calculate delay: " + err.Error())
+		self.notifyTheError("error: unable to calculate delay:  " + err.Error())
 	}
 	select {
 	case <-time.After(delay):
 		err := self.Notification.Notify()
-		die("error when using Notification API, got: %v", err)
+		die("error: unable to use Notification API: %v", err)
 	}
 	return
 }
 
-func (self *Reminder) detectClientLocation(r *http.Request) (location string) {
+func (self *Reminder) detectClientLocation(r *http.Request) (location string, err error) {
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	resp, err := http.Get("http://freegeoip.net/json/" + ip)
 	if err != nil {
-		self.notifyTheError("error when trying to geolocate client IP: " +
+		return "", errors.New("error: unable to detect client timezone from IP: " +
 			err.Error())
 	}
 	defer resp.Body.Close()
@@ -111,13 +115,13 @@ func (self *Reminder) detectClientLocation(r *http.Request) (location string) {
 	}
 	jsonResp := new(freegeoipJson)
 	if err = decoder.Decode(&jsonResp); err != nil {
-		self.notifyTheError("error when trying to parse json response: " + err.Error())
+		return "", errors.New("error: unable to parse json response: " + err.Error())
 	}
 	if jsonResp.Time_zone == "" {
-		self.notifyTheError("error: unable to detect client timezone. " +
+		return "", errors.New("error: unable to detect client timezone. " +
 			"Reminder '" + r.FormValue("message") + "' will not be sent!")
 	}
-	return jsonResp.Time_zone
+	return jsonResp.Time_zone, nil
 }
 
 func (self *Reminder) calculateNotificationDelay(loc string) (time.Duration, error) {
