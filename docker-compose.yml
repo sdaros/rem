@@ -1,0 +1,24 @@
+version: '2'
+services: 
+  proxy:
+    image: zzrot/alpine-caddy
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile
+      - ./.caddy:/root/.caddy
+    networks:
+      - frontend
+
+  rem:
+    image: sdaros/rem
+    expose:
+      - 42888
+    volumes:
+      - ./rem.conf.example:/app/.config/rem/rem.conf
+    networks:
+      - frontend
+
+networks:
+  frontend:
