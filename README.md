@@ -8,7 +8,7 @@ Notifications will be sent to your smartphone if you are using the [Pushover](ht
 
 ## Installation (Using Digitalocean)
 
-Let's assume you own the domain `cip.li` and you're using [Digitalocean](https://digitalocean.com) Docker droplet. You want the REM daemon to listen on `https://cip.li/rem`.
+Let's assume you own the domain `cip.li` and you're using a [Digitalocean](https://digitalocean.com) Docker droplet. You want the REM daemon to listen on `https://cip.li/rem`.
 
 ### 1. Create a Docker Droplet then clone the github repo
 
