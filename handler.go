@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"html/template"
 	"log"
-	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -16,6 +13,18 @@ type Reminder struct {
 	TemplateData *Template
 	ThenDate     string
 	ThenTime     string
+}
+
+func newReminder(app *App) *Reminder {
+	return &Reminder{
+		Notification: app.Notification,
+		TemplateData: &Template{
+			SuccessMsg: "",
+			InputType:  "time",
+			Domain:     app.Domain,
+			Path:       app.Path,
+		},
+	}
 }
 
 func CreateReminder(app *App) http.Handler {
@@ -35,27 +44,6 @@ func CreateReminder(app *App) http.Handler {
 	})
 }
 
-func newReminder(app *App) *Reminder {
-	return &Reminder{
-		Notification: app.Notification,
-		TemplateData: &Template{
-			SuccessMsg: "",
-			InputType:  "time",
-			Domain:     app.Domain,
-			Path:       app.Path,
-		},
-	}
-}
-
-func (self *Reminder) renderTemplate(w http.ResponseWriter) {
-	tmpl, err := template.New("createReminder").Parse(createReminderTemplate)
-	die("error: unable to render template: %v", err)
-	w.WriteHeader(http.StatusOK)
-	err = tmpl.ExecuteTemplate(w, "createReminder", self.TemplateData)
-	die("error: unable to execute template: %v", err)
-	return
-}
-
 func (self *Reminder) submit(w http.ResponseWriter, r *http.Request) {
 	if err := self.validateClientInput(r); err != nil {
 		http.Error(w, "Sorry, we were unable to process your Input.",
@@ -73,26 +61,10 @@ func (self *Reminder) submit(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (self *Reminder) validateClientInput(r *http.Request) error {
-	self.ThenDate = r.FormValue("date")
-	self.ThenTime = r.FormValue("time")
-	self.Message = r.FormValue("message")
-	_, err := time.Parse("2006-01-02 15:04", self.ThenDate+" "+self.ThenTime)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (self *Reminder) sendReminder(r *http.Request) {
-	loc, err := self.detectClientLocation(r)
+	delay, err := self.calculateNotificationDelay(r)
 	if err != nil {
-		self.notifyTheError(err.Error())
-		return
-	}
-	delay, err := self.calculateNotificationDelay(loc)
-	if err != nil {
-		self.notifyTheError("error: unable to calculate delay:  " + err.Error())
+		self.notifyAndLogTheError("error: unable to calculate delay:  " + err.Error())
 		return
 	}
 	self.logNewReminder()
@@ -104,42 +76,47 @@ func (self *Reminder) sendReminder(r *http.Request) {
 	return
 }
 
-func (self *Reminder) detectClientLocation(r *http.Request) (location string, err error) {
-	clientIp := getRealIp(r)
-	resp, err := http.Get("http://freegeoip.net/json/" + clientIp)
-	if err != nil {
-		return "", errors.New("error: unable to detect client timezone from IP: " +
-			err.Error())
-	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	type freegeoipJson struct {
-		Time_zone string
-	}
-	jsonResp := new(freegeoipJson)
-	if err = decoder.Decode(&jsonResp); err != nil {
-		return "", errors.New("error: unable to parse json response: " + err.Error())
-	}
-	if jsonResp.Time_zone == "" {
-		return "", errors.New("error: unable to detect client timezone. " +
-			"Reminder '" + r.FormValue("message") + "' will not be sent!")
-	}
-	return jsonResp.Time_zone, nil
-}
-
-func (self *Reminder) calculateNotificationDelay(loc string) (time.Duration, error) {
-	locationOfClient, err := time.LoadLocation(loc)
+func (self *Reminder) calculateNotificationDelay(r *http.Request) (time.Duration, error) {
+	clientNow, err := time.Parse("Mon Jan _2 2006 15:04:05 GMT-0700 (MST)",
+		r.FormValue("client-now"))
 	if err != nil {
 		return 0, err
 	}
 	then, err := time.ParseInLocation("2006-01-02 15:04",
-		self.ThenDate+" "+self.ThenTime, locationOfClient)
+		self.ThenDate+" "+self.ThenTime, clientNow.Location())
 	if err != nil {
 		return 0, err
 	}
-	now := time.Now().In(locationOfClient)
+	now := time.Now().In(clientNow.Location())
 	delay := then.Sub(now)
 	return delay, nil
+}
+
+func (self *Reminder) renderTemplate(w http.ResponseWriter) {
+	tmpl, err := template.New("createReminder").Parse(createReminderTemplate)
+	die("error: unable to render template: %v", err)
+	w.WriteHeader(http.StatusOK)
+	err = tmpl.ExecuteTemplate(w, "createReminder", self.TemplateData)
+	die("error: unable to execute template: %v", err)
+	return
+}
+
+func (self *Reminder) validateClientInput(r *http.Request) error {
+	self.ThenDate = r.FormValue("date")
+	self.ThenTime = r.FormValue("time")
+	self.Message = r.FormValue("message")
+	_, err := time.Parse("2006-01-02 15:04", self.ThenDate+" "+self.ThenTime)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *Reminder) notifyAndLogTheError(err string) {
+	log.Printf("%v", err)
+	self.Notification.Message = err
+	notifyErr := self.Notification.Notify()
+	die("%v", notifyErr)
 }
 
 func (self *Reminder) logNewReminder() {
@@ -160,19 +137,4 @@ func matchesAndroidBrowserUserAgent(r *http.Request) bool {
 		return true
 	}
 	return false
-}
-
-func getRealIp(r *http.Request) (ip string) {
-	realIp := r.Header.Get("X-Real-IP")
-	if realIp != "" {
-		return realIp
-	}
-	ip, _, _ = net.SplitHostPort(r.RemoteAddr)
-	return ip
-}
-
-func (self *Reminder) notifyTheError(err string) {
-	self.Notification.Message = err
-	notifyErr := self.Notification.Notify()
-	die("%v", notifyErr)
 }

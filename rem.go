@@ -22,7 +22,7 @@ type App struct {
 func main() {
 	app := new(App)
 	app.Notification = new(Notification)
-	loadConfigurationFile(app)
+	app.loadConfigurationFile()
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
 	log.Printf("Serving rem (version: %v) on %v/%v",
@@ -31,12 +31,12 @@ func main() {
 	log.Fatal(err)
 }
 
-func loadConfigurationFile(app *App) {
+func (self *App) loadConfigurationFile() {
 	homeDir := os.Getenv("HOME")
 	configFile, err := os.Open(homeDir + "/.config/rem/rem.conf")
 	die("error: unable to find configuration file! %v", err)
 	decoder := json.NewDecoder(configFile)
-	err = decoder.Decode(&app)
+	err = decoder.Decode(&self)
 	die("error: unable to parse configuration file: %v", err)
 }
 

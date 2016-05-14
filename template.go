@@ -27,6 +27,9 @@ var createReminderTemplate = `
     <p><strong>{{.SuccessMsg}}</strong></p>
     <form id="rem-form" action="{{.Domain}}/{{.Path}}" method="POST">
       <div>
+        <input id="client-now" type="hidden" name="client-now">
+      </div>
+      <div>
         <label for="time">Time*: </label>
 	<input id="time" type="{{.InputType}}" name="time" required>
       </div>
@@ -42,6 +45,7 @@ var createReminderTemplate = `
     </form>
     <script>
       now = new Date();
+      document.getElementById("client-now").setAttribute("value", now);
       then = new Date(now.getTime() + 30*60000);
       inThirtyMinutes = addZero(then.getHours()) + ":" + addZero(then.getMinutes());
       dateToday = now.getFullYear() + "-" + addZero(now.getMonth() + 1) + "-" + addZero(now.getDate());
