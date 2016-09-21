@@ -24,10 +24,9 @@ Create the file `~/.config/rem/rem.conf` and configure it to suit your needs
 {
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
-	"DocumentRoot": "./",
-	"Domain": "https://cip.li",
+	"Domain": "cip.li",
 	"NotificationApi": "https://api.pushover.net/1/messages.json",
-	"Path": "/",
+	"Path": "",
 	"Port": ":42888"
 }
 ```
@@ -61,10 +60,9 @@ Customise `rem.conf`
 {
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
-	"DocumentRoot": "/app",
-	"Domain": "https://cip.li",
+	"Domain": "cip.li",
 	"NotificationApi": "https://api.pushover.net/1/messages.json",
-	"Path": "rem",
+	"Path": "/rem",
 	"Port": ":42888"
 }
 ```
