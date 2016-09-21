@@ -23,6 +23,7 @@ func newReminder(app *App) *Reminder {
 			InputType:  "time",
 			Domain:     app.Domain,
 			Path:       app.Path,
+			Port:       app.Port,
 		},
 	}
 }

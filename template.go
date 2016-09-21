@@ -5,6 +5,7 @@ type Template struct {
 	InputType  string
 	Domain     string
 	Path       string
+	Port       string
 }
 
 func (self *Template) fallbackToFormInputTypeText() {
@@ -25,7 +26,7 @@ var createReminderTemplate = `
   <body>
     <h2>Send me a reminder!</h2>
     <p><strong>{{.SuccessMsg}}</strong></p>
-    <form id="rem-form" action="{{.Domain}}/{{.Path}}" method="POST">
+    <form id="rem-form" action="http://{{.Domain}}{{.Port}}{{.Path}}" method="POST">
       <div>
         <input id="client-now" type="hidden" name="client-now">
       </div>

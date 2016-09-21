@@ -13,10 +13,9 @@ const (
 
 type App struct {
 	Notification
-	DocumentRoot string
-	Domain       string
-	Path         string
-	Port         string
+	Domain string
+	Path   string
+	Port   string
 }
 
 func main() {
