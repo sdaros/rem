@@ -57,7 +57,7 @@ cip.li {
 - download then run `docker-compose` with `-p <YOUR_DOMAIN>`
 
 ```bash
-[root@digitalocean ~/rem]$ curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+[root@digitalocean ~/rem]$ curl -LO $(curl -si https://api.github.com/repos/docker/compose/releases/latest | grep -oP 'http[^"]+'"`uname -s`"-"`uname -m`") > /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
 [root@digitalocean ~/rem]$ docker-compose -p cipli up -d
 ```
 
