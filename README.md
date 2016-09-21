@@ -32,11 +32,11 @@ Create the file `~/.config/rem/rem.conf` and configure it to suit your needs
 }
 ```
 
-### 3. Run the binary in the background
+### 3. Run the binary as a service
 
 ```bash
-[user@raspberrypi3 ~]$ ./rem-Linux-armv7l &
-2016/09/21 22:50:01 Serving rem (version: 0.6.0) on :42888/
+[user@raspberrypi3 ~]$ sudo systemd-run --set-env=HOME=${HOME} --unit=rem rem-Linux-armv7l
+Running as unit rem.service.
 [user@raspberrypi3 ~]$
 ```
 
