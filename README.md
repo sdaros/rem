@@ -6,9 +6,43 @@ Just run the REM daemon on your server then go to the URL with your browser or `
 
 Notifications will be sent to your smartphone if you are using the [Pushover](http://pushover.net) service.
 
+## Installation (Quick and Dirty)
+
+Let's assume you own the domain `cip.li` and want to run the REM daemon on Port 42888 on your RaspberryPi 3
+
+### 1. Download the latest release to your RaspberryPi
+
+```bash
+[user@raspberrypi3 ~]$  curl -LO "https://github.com/sdaros/rem/releases/download/v0.6.0/rem-Linux-armv7l"
+```
+
+### 2. Customise the config file
+
+Create the file `~/.config/rem/rem.conf` and configure it to suit your needs
+```bash
+[user@raspberrypi3 ~]$ mkdir -p ~/.config/rem && vim ~/.config/rem/rem.conf
+{
+	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
+	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
+	"DocumentRoot": "./",
+	"Domain": "https://cip.li",
+	"NotificationApi": "https://api.pushover.net/1/messages.json",
+	"Path": "/",
+	"Port": ":42888"
+}
+```
+
+### 3. Run the binary in the background
+
+```bash
+[user@raspberrypi3 ~]$ ./rem-Linux-armv7l &
+2016/09/21 22:50:01 Serving rem (version: 0.6.0) on :42888/
+[user@raspberrypi3 ~]$
+```
+
 ## Installation (Using Digitalocean)
 
-Let's assume you own the domain `cip.li` and you're using a [Digitalocean](https://digitalocean.com) Docker droplet. You want the REM daemon to listen on `https://cip.li/rem`.
+So, now were using a [Digitalocean](https://digitalocean.com) Docker droplet and want the REM daemon to listen on `https://cip.li/rem`.
 
 ### 1. Create a Docker Droplet then clone the github repo
 
