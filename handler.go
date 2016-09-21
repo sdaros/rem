@@ -38,40 +38,41 @@ func CreateReminder(app *App) http.Handler {
 			reminder.renderTemplate(w)
 			return
 		case "POST":
-			reminder.submit(w, r)
+			submit(reminder, w, r)
 			return
 		}
 	})
 }
 
-func (self *Reminder) submit(w http.ResponseWriter, r *http.Request) {
-	if err := self.validateClientInput(r); err != nil {
+func submit(reminder *Reminder, w http.ResponseWriter, r *http.Request) {
+	if err := reminder.validateClientInput(r); err != nil {
 		http.Error(w, "Sorry, we were unable to process your Input.",
 			http.StatusInternalServerError)
 		return
 	}
-	go self.sendReminder(r)
+	go send(reminder, r)
 	if isAjaxRequest(r) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	self.TemplateData.SuccessMsg = "Thank you! Your reminder will be sent at " +
-		self.ThenDate + " " + self.ThenTime
-	self.renderTemplate(w)
+	reminder.TemplateData.SuccessMsg = "Thank you! Your reminder will be sent at " +
+		reminder.ThenDate + " " + reminder.ThenTime
+	reminder.renderTemplate(w)
 	return
 }
 
-func (self *Reminder) sendReminder(r *http.Request) {
-	delay, err := self.calculateNotificationDelay(r)
+func send(reminder *Reminder, r *http.Request) {
+	delay, err := reminder.calculateNotificationDelay(r)
 	if err != nil {
-		self.notifyAndLogTheError("error: unable to calculate delay:  " + err.Error())
+		reminder.notifyAndLogTheError("error: unable to calculate delay:  " + err.Error())
 		return
 	}
-	self.logNewReminder()
+	reminder.logNewReminder()
 	select {
 	case <-time.After(delay):
-		err := self.Notification.Notify()
+		err := reminder.Notification.Notify()
 		die("error: unable to use Notification API: %v", err)
+		reminder.logSendingReminderNow()
 	}
 	return
 }
@@ -122,6 +123,12 @@ func (self *Reminder) notifyAndLogTheError(err string) {
 func (self *Reminder) logNewReminder() {
 	log.Printf("The reminder '%v' will be sent at %v",
 		self.Message, self.ThenDate+" "+self.ThenTime)
+	return
+}
+
+func (self *Reminder) logSendingReminderNow() {
+	log.Printf("The reminder '%v' has been sent to Notification API at '%v'",
+		self.Message, time.Now())
 	return
 }
 
