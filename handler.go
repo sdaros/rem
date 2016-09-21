@@ -9,7 +9,7 @@ import (
 )
 
 type Reminder struct {
-	*Notification
+	Notification
 	TemplateData *Template
 	ThenDate     string
 	ThenTime     string

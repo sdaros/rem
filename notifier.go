@@ -15,7 +15,7 @@ type (
 	}
 )
 
-func (self *Notification) Notify() error {
+func (self Notification) Notify() error {
 	resp, err := http.PostForm(self.Api,
 		url.Values{"token": {self.Token},
 			"user":    {self.User},

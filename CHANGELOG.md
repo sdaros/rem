@@ -1,5 +1,9 @@
 # REM Changelog
 
+## 0.6.0 / 2016-09-21
+
+*  Multiple Notifications should now arrive properly on notification device
+
 ## 0.5.0 / 2016-05-14
 
 * Detect client timezone on reminder submission

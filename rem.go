@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	version = "0.5.0"
+	version = "0.6.0"
 )
 
 type App struct {
-	*Notification
+	Notification
 	DocumentRoot string
 	Domain       string
 	Path         string
@@ -21,7 +21,7 @@ type App struct {
 
 func main() {
 	app := new(App)
-	app.Notification = new(Notification)
+	app.Notification = *&Notification{}
 	app.loadConfigurationFile()
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
