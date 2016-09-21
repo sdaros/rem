@@ -13,9 +13,8 @@ const (
 
 type App struct {
 	Notification
-	Domain string
-	Path   string
-	Port   string
+	Port string
+	Url  string
 }
 
 func main() {
@@ -24,8 +23,8 @@ func main() {
 	app.loadConfigurationFile()
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
-	log.Printf("Serving rem (version: %v) on %v/%v",
-		version, app.Port, app.Path)
+	log.Printf("Serving rem (version: %v) on %v",
+		version, app.Port)
 	err := http.ListenAndServe(app.Port, mux)
 	log.Fatal(err)
 }

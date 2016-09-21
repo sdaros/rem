@@ -1,11 +1,26 @@
 package main
 
+import (
+	"net/http"
+)
+
 type Template struct {
 	SuccessMsg string
 	InputType  string
-	Domain     string
-	Path       string
-	Port       string
+	Url        string
+}
+
+func (self *Template) populate(r *http.Request) {
+	url := r.Host
+	if self.InputType == "" {
+		self.InputType = "time"
+	}
+	if r.TLS == nil {
+		url = "http://" + url
+	} else {
+		url = "https://" + url
+	}
+	self.Url = url
 }
 
 func (self *Template) fallbackToFormInputTypeText() {
@@ -26,7 +41,7 @@ var createReminderTemplate = `
   <body>
     <h2>Send me a reminder!</h2>
     <p><strong>{{.SuccessMsg}}</strong></p>
-    <form id="rem-form" action="http://{{.Domain}}{{.Port}}{{.Path}}" method="POST">
+    <form id="rem-form" action="{{.Url}}" method="POST">
       <div>
         <input id="client-now" type="hidden" name="client-now">
       </div>
