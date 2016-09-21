@@ -34,7 +34,7 @@ Create the file `~/.config/rem/rem.conf` and configure it to suit your needs
 ### 3. Run the binary as a service
 
 ```bash
-[user@raspberrypi3 ~]$ sudo systemd-run --set-env=HOME=${HOME} --unit=rem rem-Linux-armv7l
+[user@raspberrypi3 ~]$ sudo systemd-run --setenv=HOME=${HOME} --unit=rem ./rem-Linux-armv7l
 Running as unit rem.service.
 [user@raspberrypi3 ~]$
 ```
