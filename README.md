@@ -20,10 +20,9 @@ Login via ssh and clone the repo to your home directory
 
 ### 2. Customise the config file
 
-Customise `rem.conf.example`
+Customise `rem.conf`
 
 ```bash
-[root@digitalocean ~/rem]$ cp rem.conf.example rem.conf
 [root@digitalocean ~/rem]$ vim rem.conf # Configure it to suit your needs
 {
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
