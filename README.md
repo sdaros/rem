@@ -13,7 +13,7 @@ Let's assume you own the domain `cip.li` and want to run the REM daemon on Port 
 ### 1. Download the latest release to your RaspberryPi
 
 ```bash
-[user@raspberrypi3 ~]$  curl -LO "https://github.com/sdaros/rem/releases/download/v0.6.0/rem-Linux-armv7l"
+[user@raspberrypi3 ~]$  curl -LO "https://github.com/sdaros/rem/releases/download/v0.6.0/rem-Linux-armv7l && chmod +x rem-Linux-armv7l"
 ```
 
 ### 2. Customise the config file
