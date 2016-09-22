@@ -18,7 +18,13 @@ type Reminder struct {
 func newReminder(app *App) *Reminder {
 	return &Reminder{
 		Notification: app.Notification,
-		TemplateData: &Template{},
+		TemplateData: &Template{
+			SuccessMsg: "",
+			InputType:  "time",
+			Domain:     app.Domain,
+			Path:       app.Path,
+			Port:       app.Port,
+		},
 	}
 }
 
@@ -30,7 +36,7 @@ func CreateReminder(app *App) http.Handler {
 			if matchesAndroidBrowserUserAgent(r) {
 				reminder.TemplateData.fallbackToFormInputTypeText()
 			}
-			reminder.renderTemplate(w, r)
+			reminder.renderTemplate(w)
 			return
 		case "POST":
 			submit(reminder, w, r)
@@ -52,7 +58,7 @@ func submit(reminder *Reminder, w http.ResponseWriter, r *http.Request) {
 	}
 	reminder.TemplateData.SuccessMsg = "Thank you! Your reminder will be sent at " +
 		reminder.ThenDate + " " + reminder.ThenTime
-	reminder.renderTemplate(w, r)
+	reminder.renderTemplate(w)
 	return
 }
 
@@ -88,8 +94,7 @@ func (self *Reminder) calculateNotificationDelay(r *http.Request) (time.Duration
 	return delay, nil
 }
 
-func (self *Reminder) renderTemplate(w http.ResponseWriter, r *http.Request) {
-	self.TemplateData.populate(r)
+func (self *Reminder) renderTemplate(w http.ResponseWriter) {
 	tmpl, err := template.New("createReminder").Parse(createReminderTemplate)
 	die("error: unable to render template: %v", err)
 	w.WriteHeader(http.StatusOK)
