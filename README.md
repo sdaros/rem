@@ -60,10 +60,10 @@ Customise `rem.conf`
 {
 	"ApiToken": "n1VrLLmRMPStaX3pA8TPdh2Kl2QS3q", # Needed for the https://pushover.net Notification Service
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
-	"Domain": "http://cip.li",
+	"Domain": "https://cip.li",
 	"NotificationApi": "https://api.pushover.net/1/messages.json",
 	"Path": "rem",
-	"Port": "42888"
+	"Port": "443"
 }
 ```
 
@@ -77,7 +77,7 @@ If you do not already have a reverse proxy setup for your domain name, you can u
 [root@digitalocean ~/rem]$ vim Caddyfile
 # A Caddyfile for our example could look like the following:
 cip.li {
-        proxy /rem rem:42888 {
+        proxy /rem rem:443 {
                 proxy_header Host {host}
                 proxy_header X-Real-IP {remote}
                 proxy_header X-Forwarded-Proto {scheme}
