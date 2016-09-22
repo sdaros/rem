@@ -26,7 +26,7 @@ var createReminderTemplate = `
   <body>
     <h2>Send me a reminder!</h2>
     <p><strong>{{.SuccessMsg}}</strong></p>
-    <form id="rem-form" action="{{.Domain}}{{.Port}}{{.Path}}" method="POST">
+    <form id="rem-form" action="{{.Domain}}:{{.Port}}/{{.Path}}" method="POST">
       <div>
         <input id="client-now" type="hidden" name="client-now">
       </div>

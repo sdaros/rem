@@ -25,8 +25,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", CreateReminder(app))
 	log.Printf("Serving rem (version: %v) on %v/%v",
-		version, app.Port, app.Path)
-	err := http.ListenAndServe(app.Port, mux)
+		version, ":"+app.Port, app.Path)
+	err := http.ListenAndServe(":"+app.Port, mux)
 	log.Fatal(err)
 }
 
