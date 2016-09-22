@@ -27,7 +27,7 @@ Create the file `~/.config/rem/rem.conf` and configure it to suit your needs
 	"Domain": "http://cip.li",
 	"NotificationApi": "https://api.pushover.net/1/messages.json",
 	"Path": "",
-	"Port": ":42888"
+	"Port": "42888"
 }
 ```
 
@@ -62,8 +62,8 @@ Customise `rem.conf`
 	"ApiUser": "cf3YtkHfnSQkYb8GTWSZuPrddTPymQ", # Needed for the https://pushover.net Notification Service
 	"Domain": "http://cip.li",
 	"NotificationApi": "https://api.pushover.net/1/messages.json",
-	"Path": "/rem",
-	"Port": ":42888"
+	"Path": "rem",
+	"Port": "42888"
 }
 ```
 
