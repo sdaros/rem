@@ -6,7 +6,7 @@ arch = amd64
 release = $(app)-v$(version)-$(os)-$(arch)
 
 all:
-	go build -o $(builddir)/$(release) --ldflags '-extldflags "-static"'
+	go build -o $(builddir)/$(release) -ldflags "-linkmode external -extldflags -static"
 
 aci:
 	sudo ./build-aci
