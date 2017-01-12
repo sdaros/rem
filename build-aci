@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -e
+# Import environment variables
+source ./environment
+
+if [ "$EUID" -ne 0 ] ; then
+  echo "build-aci: This script uses functionality which requires root privileges"
+  exit 1
+fi
+
+if ! command -v $ACBUILD >/dev/null; then
+    echo "build-aci: acbuild ($ACBUILD) is not executable"
+    exit 1
+fi
+
+if [ -z "$APP" ] ; then
+  echo "build-aci: Please set appropriate environment variables"
+    exit 1
+fi
+
+if [ ! -d "$BUILDDIR" ]; then
+  echo "build-aci: build directory does not exist"
+fi
+
+acbuild --debug begin
+
+# In the event of the script exiting, end the build
+trap "{ export EXT=$?; acbuild --debug end && exit $EXT;}" EXIT
+
+acbuild --debug set-name sdaros/${APP}
+acbuild --debug annotation add authors "Stefano Da Ros <sdaros@cip.li>"
+acbuild --debug label add version ${VERSION}
+acbuild --debug label add arch ${ARCH}
+acbuild --debug label add os ${OS}
+# Based on alpine
+acbuild --debug dep add quay.io/coreos/alpine-sh
+# Add dependencies
+acbuild --debug run -- apk update
+acbuild --debug run -- apk add --no-cache ca-certificates tzdata
+# Add binary
+acbuild --debug copy ${BUILDDIR}/${RELEASE} /usr/bin/${APP}
+acbuild --debug run -- chmod +x /usr/bin/${APP}
+# Add config file
+acbuild --debug run -- mkdir -p /app/.config
+acbuild --debug mount add --read-only rem-conf /app/.config/rem.conf
+# Expose default listen port
+acbuild --debug port add ${APP} tcp 42888
+acbuild --debug set-exec -- /usr/bin/$APP
+acbuild --debug write --overwrite ${BUILDDIR}/${RELEASE}.aci

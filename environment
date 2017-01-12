@@ -1,0 +1,10 @@
+BUILDDIR=${BUILDDIR:-./bin}
+# A non-installed acbuild can be used, for example:
+# ACBUILD=../../appc/acbuild/bin/acbuild
+ACBUILD=${ACBUILD:-acbuild}
+APP=rem
+VERSION=0.6.0
+OS=linux
+ARCH=amd64
+RELEASE=${APP}-v${VERSION}-${OS}-${ARCH}
+ACI_PGP_KEY=AC79FE601A89E2C07709A6391FC57C070DAC539A

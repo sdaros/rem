@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+source ./environment
+pass -c f/gpg-sdaros-aci && \
+gpg --armor --default-key ${ACI_PGP_KEY} --output ${BUILDDIR}/${RELEASE}.aci.asc --detach-sig ${BUILDDIR}/${RELEASE}.aci
