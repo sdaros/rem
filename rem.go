@@ -32,7 +32,8 @@ func main() {
 
 func (self *App) loadConfigurationFile() {
 	homeDir := os.Getenv("HOME")
-	configFile, err := os.Open(homeDir + "/.config/rem/rem.conf")
+	config := os.Getenv("CONFIG")
+	configFile, err := os.Open(homeDir + config)
 	die("error: unable to find configuration file! %v", err)
 	decoder := json.NewDecoder(configFile)
 	err = decoder.Decode(&self)
