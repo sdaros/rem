@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 Slice=machine.slice
-ExecStart=/usr/bin/rkt run --dns=8.8.8.8 --dns=4.2.2.2 --volume config-file,kind=host,source=/home/core/svr/rem/rem.conf /home/core/svr/rem/bin/rem-v0.6.0-linux-amd64.aci
+ExecStart=/usr/bin/rkt run --dns=8.8.8.8 --dns=4.2.2.2 --volume config,kind=host,source=/home/core/svr/rem/rem.conf /home/core/svr/rem/bin/rem-v0.6.0-linux-amd64.aci
 KillMode=mixed
 Restart=always
 

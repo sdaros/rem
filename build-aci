@@ -32,20 +32,18 @@ acbuild --debug annotation add authors "Stefano Da Ros <sdaros@cip.li>"
 acbuild --debug label add version ${VERSION}
 acbuild --debug label add arch ${ARCH}
 acbuild --debug label add os ${OS}
-acbuild --debug environment add HOME /app
-acbuild --debug environment add CONFIG ${APP}.conf
-acbuild --debug set-working-directory /app
 # Based on alpine
 acbuild --debug dep add quay.io/coreos/alpine-sh
 # Add dependencies
 acbuild --debug run -- apk update
 acbuild --debug run -- apk add --no-cache ca-certificates tzdata
 # Add binary
+acbuild --debug run -- mkdir /app
 acbuild --debug copy ${BUILDDIR}/${RELEASE} /usr/bin/${APP}
 acbuild --debug run -- chmod +x /usr/bin/${APP}
 # Add config file
-acbuild --debug mount add --read-only config-file /app/${APP}.conf
+acbuild --debug mount add config /app/rem.conf
 # Expose default listen port
 acbuild --debug port add ${APP} tcp 42888
-acbuild --debug set-exec -- /usr/bin/$APP
+acbuild --debug set-exec -- /usr/bin/$APP --config /app/${APP}.conf
 acbuild --debug write --overwrite ${BUILDDIR}/${RELEASE}.aci
